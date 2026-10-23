@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Understanding requirements · Agent concepts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html">← Concept map</a>
+  <span class="sep">·</span>
+  <span class="muted">Understanding requirements</span>
+  <span class="sep">·</span>
+  <a href="architecture.html">Agent architecture</a>
+  <a href="output.html">Output handling</a>
+  <a href="lifecycle.html">Life cycle</a>
+</nav>
+
+<h1>Understanding requirements</h1>
+<p class="s"><code>SPEC</code> becomes the prompt, the validator rules, and the acceptance test — one source of truth, three consumers.</p>
+
+<figure>
+<svg class="diagram" viewBox="0 0 820 360" role="img" aria-label="SPEC dictionary feeding prompt, validator, and acceptance test">
+  <!-- source -->
+  <rect class="dbox hi" x="40" y="130" width="200" height="100" rx="10"/>
+  <text class="dlabel" x="140" y="162" text-anchor="middle">SPEC</text>
+  <text class="dcode" x="140" y="186" text-anchor="middle">min_basket_gbp: 50</text>
+  <text class="dcode" x="140" y="204" text-anchor="middle">low_stock_below: 2</text>
+  <text class="dcode" x="140" y="222" text-anchor="middle">done_when: order_placed</text>
+
+  <!-- arrows out -->
+  <path class="dline hi" d="M250 155 C310 155 320 80 380 80"/>
+  <path class="dline hi" d="M250 180 C310 180 320 180 380 180"/>
+  <path class="dline hi" d="M250 205 C310 205 320 280 380 280"/>
+  <polygon fill="var(--hi)" points="378,80 368,74 368,86"/>
+  <polygon fill="var(--hi)" points="378,180 368,174 368,186"/>
+  <polygon fill="var(--hi)" points="378,280 368,274 368,286"/>
+
+  <!-- three consumers -->
+  <rect class="dbox" x="390" y="48" width="220" height="64" rx="8"/>
+  <text class="dlabel" x="500" y="74" text-anchor="middle">1 · Prompt</text>
+  <text class="dsub" x="500" y="94" text-anchor="middle">first user message is json.dumps(SPEC)</text>
+
+  <rect class="dbox" x="390" y="148" width="220" height="64" rx="8"/>
+  <text class="dlabel" x="500" y="174" text-anchor="middle">2 · Validator rules</text>
+  <text class="dsub" x="500" y="194" text-anchor="middle">validate() reads min_basket_gbp, max_lines</text>
+
+  <rect class="dbox" x="390" y="248" width="220" height="64" rx="8"/>
+  <text class="dlabel" x="500" y="274" text-anchor="middle">3 · Acceptance test</text>
+  <text class="dsub" x="500" y="294" text-anchor="middle">assert run() until done_when</text>
+
+  <!-- right side notes -->
+  <rect class="dfill" x="640" y="48" width="150" height="264" rx="10"/>
+  <text class="dsub" x="715" y="90" text-anchor="middle">Write the rule once.</text>
+  <text class="dsub" x="715" y="112" text-anchor="middle">The model is told</text>
+  <text class="dsub" x="715" y="130" text-anchor="middle">the same constraint</text>
+  <text class="dsub" x="715" y="148" text-anchor="middle">the code checks</text>
+  <text class="dsub" x="715" y="166" text-anchor="middle">and the test asserts.</text>
+  <text class="dsub" x="715" y="210" text-anchor="middle">Change one number</text>
+  <text class="dsub" x="715" y="228" text-anchor="middle">in SPEC and all</text>
+  <text class="dsub" x="715" y="246" text-anchor="middle">three move together.</text>
+</svg>
+<figcaption>One SPEC dict, three jobs: tell the model what to do, tell the harness what to reject, tell CI whether the bot succeeded.</figcaption>
+</figure>
+
+<h2>What “requirements” means here</h2>
+<p>
+In agent work the requirements are not a slide deck — they are a small, executable object.
+In <code>poc/bot.py</code> that object is the <code>SPEC</code> dict on the <code>[REQ]</code> section:
+</p>
+<pre><code>SPEC = {"goal": "restock low items", "min_basket_gbp": 50, "max_lines": 12,
+        "low_stock_below": 2, "done_when": "order_placed"}</code></pre>
+<p>
+Each field has a job beyond documentation. If a rule only lives in prose, the model will ignore it and the test will not notice.
+If it lives in <code>SPEC</code>, every stage of the harness can read the same number.
+</p>
+
+<h2>Field by field</h2>
+<table>
+  <tr><th>Field</th><th>Value</th><th>Becomes</th></tr>
+  <tr>
+    <td><code>goal</code></td>
+    <td>restock low items</td>
+    <td>Part of the prompt. The model is told what “good” looks like before it invents a goal.</td>
+  </tr>
+  <tr>
+    <td><code>min_basket_gbp</code></td>
+    <td>50</td>
+    <td>A <code>validate()</code> rule. Also the reason the first basket is rejected (it is under £50).</td>
+  </tr>
+  <tr>
+    <td><code>max_lines</code></td>
+    <td>12</td>
+    <td>Another validator rule. Caps how large a single order can grow.</td>
+  </tr>
+  <tr>
+    <td><code>low_stock_below</code></td>
+    <td>2</td>
+    <td>Domain rule the model should use when choosing what to restock. It is in the prompt the model sees.</td>
+  </tr>
+  <tr>
+    <td><code>done_when</code></td>
+    <td>order_placed</td>
+    <td>The acceptance criterion. <code>assert run()</code> only passes when the loop reaches that state.</td>
+  </tr>
+</table>
+
+<h2>How the SPEC travels</h2>
+<h3>1 · Into the prompt</h3>
+<p>
+The first message in <code>run()</code> is the whole dict, serialised as JSON:
+</p>
+<pre><code>msgs = [{"role": "user", "content": json.dumps(SPEC)}]   # spec becomes the prompt</code></pre>
+<p>
+The model never hears “please make a basket of at least fifty pounds unless you feel like it”.
+It hears the same object the validator uses. Prompt and code stay aligned by construction.
+</p>
+
+<h3>2 · Into the validator</h3>
+<p>
+<code>validate()</code> does not invent thresholds. It reads them:
+</p>
+<pre><code>if basket_total(b) &lt; SPEC["min_basket_gbp"]:
+    return f"basket £{basket_total(b)} is below minimum £{SPEC['min_basket_gbp']}"</code></pre>
+<p>
+That message is not a crash — it is structured feedback the loop appends as an <code>error</code> role,
+so the model can correct itself on the next step.
+</p>
+
+<h3>3 · Into the acceptance test</h3>
+<p>
+The life-cycle gate at the bottom of the file is one assert:
+</p>
+<pre><code>assert run(), "acceptance test failed: bot never reached done_when"</code></pre>
+<p>
+<code>run()</code> returns <code>True</code> only when the model emits an action that ends the task
+(<code>done_when</code>). If the bot never places an order, the process exits non-zero.
+The requirement is therefore not just stated — it is CI-enforced.
+</p>
+
+<h2>Why one source of truth</h2>
+<div class="note">
+  <strong>Design rule:</strong> if a constraint matters, put it in <code>SPEC</code> and reference it.
+  Prose can explain it. Code must execute it.
+</div>
+<ul>
+  <li><strong>Change is cheap.</strong> Raising the minimum to £80 is one edit; the prompt, the rejection message, and the test all follow.</li>
+  <li><strong>Feedback is honest.</strong> The error text quotes the same number the model was told, so retries are convergent, not confusing.</li>
+  <li><strong>Tests are not a second spec.</strong> Acceptance is “did you meet <code>done_when</code>?”, not a parallel checklist that drifts.</li>
+</ul>
+
+<h2>Walkthrough with the grocery bot</h2>
+<ol>
+  <li><code>run()</code> seeds history with <code>json.dumps(SPEC)</code>.</li>
+  <li>The model returns a basket that totals about £10.70 — under <code>min_basket_gbp</code>.</li>
+  <li><code>validate()</code> returns <span class="badge bad">basket £10.70 is below minimum £50</span>.</li>
+  <li>The loop prints <code>REJECTED</code>, appends an <code>error</code> message, and continues.</li>
+  <li>The model retries with a larger basket. Validator passes. Order is placed.</li>
+  <li><code>assert run()</code> passes because <code>done_when</code> was reached.</li>
+</ol>
+
+<h2>Exercises</h2>
+<ol>
+  <li>Change <code>min_basket_gbp</code> to <code>80</code>. Run the bot. What happens at <code>max_steps</code>?</li>
+  <li>Add a <code>max_basket_gbp</code> field to <code>SPEC</code>, teach <code>validate()</code> to enforce it, and mention it in the prompt (the prompt is just the dict — nothing else to edit).</li>
+  <li>Rename <code>done_when</code> to <code>finished</code> everywhere it is read. Notice how few places need to change when the spec is the hub.</li>
+</ol>
+
+<h2>See also</h2>
+<ul>
+  <li><a href="output.html">Output handling</a> — where those validator messages become model retries.</li>
+  <li><a href="lifecycle.html">Systems life cycle</a> — the acceptance test and how monitoring writes the next requirement.</li>
+  <li>Code: <code>poc/bot.py</code>, section <code>[REQ]</code>.</li>
+</ul>
+
+<div class="pager">
+  <a href="index.html">← Concept map</a>
+  <a class="next" href="architecture.html">Next: Agent architecture →</a>
+</div>
+</body>
+</html>

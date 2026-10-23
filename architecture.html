@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent architecture · Agent concepts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html">← Concept map</a>
+  <span class="sep">·</span>
+  <a href="requirements.html">Requirements</a>
+  <span class="muted">Agent architecture</span>
+  <span class="sep">·</span>
+  <a href="llm.html">LLM fundamentals</a>
+  <a href="mcp.html">MCP dev</a>
+</nav>
+
+<h1>Agent architecture</h1>
+<p class="s"><code>run()</code> loop: calls the LLM, gates output, routes tools — a bounded harness around a stateless model.</p>
+
+<figure>
+<svg class="diagram" viewBox="0 0 820 420" role="img" aria-label="run loop architecture: model call, parse, validate, route, observe">
+  <!-- harness shell -->
+  <rect class="dfill" x="80" y="30" width="660" height="360" rx="14"/>
+  <text class="dsub" x="410" y="54" text-anchor="middle">harness · run(max_steps=8)  —  msgs[] is the memory</text>
+
+  <!-- step boxes in a loop -->
+  <rect class="dbox hi" x="120" y="80" width="150" height="52" rx="8"/>
+  <text class="dlabel" x="195" y="102" text-anchor="middle">1 · mock_llm(msgs)</text>
+  <text class="dsub" x="195" y="120" text-anchor="middle">call the model</text>
+
+  <path class="dline hi" d="M280 106 H330"/>
+  <polygon fill="var(--hi)" points="330,106 320,100 320,112"/>
+
+  <rect class="dbox" x="340" y="80" width="140" height="52" rx="8"/>
+  <text class="dlabel" x="410" y="102" text-anchor="middle">2 · parse(raw)</text>
+  <text class="dsub" x="410" y="120" text-anchor="middle">free text → JSON</text>
+
+  <path class="dline hi" d="M490 106 H540"/>
+  <polygon fill="var(--hi)" points="540,106 530,100 530,112"/>
+
+  <rect class="dbox" x="550" y="80" width="150" height="52" rx="8"/>
+  <text class="dlabel" x="625" y="102" text-anchor="middle">3 · validate(out)</text>
+  <text class="dsub" x="625" y="120" text-anchor="middle">gate against SPEC</text>
+
+  <!-- decision diamond-ish -->
+  <path class="dbox" d="M560 180 L625 155 L690 180 L625 205 Z" fill="var(--card)" stroke="var(--ln)" stroke-width="1.5"/>
+  <text class="dlabel" x="625" y="184" text-anchor="middle">ok?</text>
+
+  <path class="dline bad" d="M560 180 H420"/>
+  <polygon fill="var(--bad)" points="420,180 430,174 430,186"/>
+  <text class="dsub" x="490" y="172" text-anchor="middle" fill="var(--bad)">error role appended</text>
+
+  <rect class="dbox bad" x="250" y="160" width="150" height="42" rx="8"/>
+  <text class="dlabel" x="325" y="186" text-anchor="middle">msgs ← error</text>
+
+  <!-- retry loop back -->
+  <path class="dline bad dash" d="M250 181 C180 181 140 220 140 260 C140 300 160 320 195 320"/>
+  <path class="dline bad dash" d="M195 320 C100 320 60 200 120 120"/>
+  <!-- simplify: draw single return arc -->
+  <path class="dline bad dash" d="M325 202 V330 C325 370 195 380 195 330 V132"/>
+  <text class="dsub" x="360" y="355" fill="var(--bad)">retry (counts as a step)</text>
+
+  <!-- success paths -->
+  <path class="dline ok" d="M625 205 V250"/>
+  <polygon fill="var(--ok)" points="625,250 619,240 631,240"/>
+
+  <rect class="dbox ok" x="500" y="255" width="250" height="48" rx="8"/>
+  <text class="dlabel" x="625" y="275" text-anchor="middle">action == "tool" | "order"</text>
+  <text class="dsub" x="625" y="293" text-anchor="middle">mcp_handle → tools/call</text>
+
+  <path class="dline ok" d="M500 279 H360"/>
+  <polygon fill="var(--ok)" points="360,279 370,273 370,285"/>
+
+  <rect class="dbox ok" x="160" y="255" width="180" height="48" rx="8"/>
+  <text class="dlabel" x="250" y="275" text-anchor="middle">observe</text>
+  <text class="dsub" x="250" y="293" text-anchor="middle">msgs ← tool result</text>
+
+  <!-- done path -->
+  <path class="dline" d="M625 303 V330"/>
+  <rect class="dbox hi" x="510" y="335" width="230" height="40" rx="8"/>
+  <text class="dlabel" x="625" y="360" text-anchor="middle">done → return True</text>
+
+  <!-- max_steps badge -->
+  <rect class="dbox" x="120" y="335" width="160" height="40" rx="8"/>
+  <text class="dsub" x="200" y="352" text-anchor="middle">bounded by</text>
+  <text class="dcode" x="200" y="368" text-anchor="middle">max_steps = 8</text>
+</svg>
+<figcaption>Every model output is untrusted free text. The harness parses it, validates it against SPEC, and only then routes it to a tool or ends the loop.</figcaption>
+</figure>
+
+<h2>The agent is the loop, not the model</h2>
+<p>
+A raw LLM is a text-in / text-out function. An <em>agent</em> is a control loop that keeps calling that function,
+interpreting its output, acting on the world (via tools), and feeding results back.
+In <code>poc/bot.py</code> that loop is <code>run()</code>.
+</p>
+<pre><code>def run(max_steps=8):
+    msgs = [{"role": "user", "content": json.dumps(SPEC)}]  # spec becomes the prompt
+    for step in range(max_steps):                           # bounded loop = safety
+        raw = mock_llm(msgs)
+        ...
+</code></pre>
+
+<h2>Four responsibilities of the harness</h2>
+
+<h3>1 · Call the LLM</h3>
+<p>
+Each step starts with one model call over the full history. The harness owns <code>msgs</code>;
+the model does not persist anything between calls. See <a href="llm.html">LLM fundamentals</a>.
+</p>
+
+<h3>2 · Gate the output</h3>
+<p>
+Before anything is trusted:
+</p>
+<pre><code>try: out = parse(raw)
+except ValueError as e:
+    msgs.append({"role": "error", "content": str(e)}); continue
+err = validate(out)
+if err:
+    print(f"[{step}] REJECTED: {err}")
+    msgs.append({"role": "error", "content": err}); continue</code></pre>
+<p>
+Two gates: can we extract a JSON object, and does that object obey <code>SPEC</code>?
+Failure is not fatal — it is new context for the next step. Details in
+<a href="output.html">Output handling</a>.
+</p>
+
+<h3>3 · Route tools</h3>
+<p>
+Once an action is valid, the harness decides what to do with it:
+</p>
+<ul>
+  <li><code>"tool"</code> → <code>mcp_handle({"method": "tools/call", ...})</code></li>
+  <li><code>"order"</code> → same MCP path, with the <code>place_order</code> tool</li>
+  <li><code>"done"</code> → <code>return True</code> (the acceptance state)</li>
+</ul>
+<p>
+The model never touches the pantry directly. All side effects go through one interface.
+See <a href="mcp.html">MCP dev</a>.
+</p>
+
+<h3>4 · Bound the loop</h3>
+<p>
+<code>max_steps=8</code> is a safety property. An agent that can retry forever is a hang risk and a cost risk.
+If the model never reaches <code>done_when</code>, <code>run()</code> returns <code>False</code> and the acceptance assert fails.
+</p>
+
+<h2>Message roles are the protocol</h2>
+<table>
+  <tr><th>Role</th><th>Who appends it</th><th>Meaning</th></tr>
+  <tr><td><code>user</code></td><td>harness (once)</td><td>The SPEC — the task</td></tr>
+  <tr><td><code>assistant</code> (implied raw)</td><td>model</td><td>Free-text proposal (JSON or prose + fences)</td></tr>
+  <tr><td><code>tool</code></td><td>harness</td><td>Observation from <code>mcp_handle</code></td></tr>
+  <tr><td><code>error</code></td><td>harness</td><td>Parse or validate failure — ask the model to fix it</td></tr>
+</table>
+<p>
+This tiny vocabulary is enough. The model learns the contract from the history the harness builds.
+</p>
+
+<h2>Why this shape</h2>
+<div class="note">
+  <strong>Separation of concerns:</strong> the model proposes; the harness disposes.
+  Requirements live in <code>SPEC</code>, world state lives behind MCP, memory lives in <code>msgs</code>,
+  and control lives in <code>run()</code>. Swap any one without rewriting the others.
+</div>
+<ul>
+  <li><strong>Testable.</strong> <code>mock_llm</code> makes the loop deterministic. Swap in a real API and the gates stay identical.</li>
+  <li><strong>Safe by default.</strong> Unparsed or rule-breaking output cannot reach tools.</li>
+  <li><strong>Observable.</strong> Every rejection and tool call is printed — raw material for the monitor stage.</li>
+</ul>
+
+<h2>Walkthrough of one successful run</h2>
+<ol>
+  <li>Step 0 — model sees SPEC, returns <code>{"action":"tool","name":"list_pantry",...}</code>.</li>
+  <li>Harness routes <code>tools/call</code>; pantry JSON is appended as a <code>tool</code> message.</li>
+  <li>Step 1 — model proposes a basket. It is under £50. <code>validate</code> rejects; <code>error</code> is appended.</li>
+  <li>Step 2 — model proposes a larger basket. Validator passes. <code>place_order</code> runs.</li>
+  <li>Step 3 — model returns <code>{"action":"done", ...}</code>. Loop returns <code>True</code>.</li>
+</ol>
+
+<h2>Exercises</h2>
+<ol>
+  <li>Log every step index and action. Which step is most often the rejection? Why?</li>
+  <li>Add a third action type <code>"ask"</code> that returns a clarifying question. What should the harness do with it?</li>
+  <li>Remove the <code>max_steps</code> bound and give the mock model a permanent bug. What does that teach you?</li>
+</ol>
+
+<h2>See also</h2>
+<ul>
+  <li><a href="requirements.html">Understanding requirements</a> — what the gates check against.</li>
+  <li><a href="llm.html">LLM fundamentals</a> — why the harness must hold memory.</li>
+  <li><a href="mcp.html">MCP dev</a> — the tool boundary the loop routes through.</li>
+  <li>Code: <code>poc/bot.py</code>, section <code>[ARCH]</code>.</li>
+</ul>
+
+<div class="pager">
+  <a href="requirements.html">← Understanding requirements</a>
+  <a class="next" href="llm.html">Next: LLM fundamentals →</a>
+</div>
+</body>
+</html>

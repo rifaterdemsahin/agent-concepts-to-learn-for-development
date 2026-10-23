@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Systems life cycle · Agent concepts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html">← Concept map</a>
+  <span class="sep">·</span>
+  <a href="requirements.html">Requirements</a>
+  <a href="architecture.html">Agent architecture</a>
+  <span class="muted">Systems life cycle</span>
+  <span class="sep">·</span>
+  <a href="mcp.html">MCP dev</a>
+</nav>
+
+<h1>Systems life cycle</h1>
+<p class="s"><code>__main__</code> assert — spec, build, test, deploy, monitor, iterate; monitoring feeds new requirements.</p>
+
+<figure>
+<svg class="diagram" viewBox="0 0 820 420" role="img" aria-label="Systems life cycle: spec, build, test, deploy, monitor, iterate in a circle">
+  <!-- circular arrangement -->
+  <!-- Spec -->
+  <rect class="dbox hi" x="330" y="30" width="160" height="56" rx="10"/>
+  <text class="dlabel" x="410" y="54" text-anchor="middle">1 · Spec</text>
+  <text class="dcode" x="410" y="74" text-anchor="middle">SPEC dict</text>
+
+  <!-- Build -->
+  <rect class="dbox" x="580" y="120" width="160" height="56" rx="10"/>
+  <text class="dlabel" x="660" y="144" text-anchor="middle">2 · Build</text>
+  <text class="dcode" x="660" y="164" text-anchor="middle">poc/bot.py</text>
+
+  <!-- Test -->
+  <rect class="dbox hi" x="580" y="250" width="160" height="56" rx="10"/>
+  <text class="dlabel" x="660" y="274" text-anchor="middle">3 · Test</text>
+  <text class="dcode" x="660" y="294" text-anchor="middle">assert run()</text>
+
+  <!-- Deploy -->
+  <rect class="dbox" x="330" y="330" width="160" height="56" rx="10"/>
+  <text class="dlabel" x="410" y="354" text-anchor="middle">4 · Deploy</text>
+  <text class="dsub" x="410" y="374" text-anchor="middle">run as a service</text>
+
+  <!-- Monitor -->
+  <rect class="dbox" x="80" y="250" width="160" height="56" rx="10"/>
+  <text class="dlabel" x="160" y="274" text-anchor="middle">5 · Monitor</text>
+  <text class="dsub" x="160" y="294" text-anchor="middle">logs · rejects · cost</text>
+
+  <!-- Iterate -->
+  <rect class="dbox" x="80" y="120" width="160" height="56" rx="10"/>
+  <text class="dlabel" x="160" y="144" text-anchor="middle">6 · Iterate</text>
+  <text class="dsub" x="160" y="164" text-anchor="middle">new / changed SPEC</text>
+
+  <!-- arrows around the ring -->
+  <path class="dline hi" d="M490 58 C560 58 600 90 640 120"/>
+  <polygon fill="var(--hi)" points="640,120 628,116 634,128"/>
+
+  <path class="dline hi" d="M660 176 V250"/>
+  <polygon fill="var(--hi)" points="660,250 654,240 666,240"/>
+
+  <path class="dline hi" d="M600 306 C540 340 500 358 490 358"/>
+  <polygon fill="var(--hi)" points="490,358 500,350 500,366"/>
+
+  <path class="dline hi" d="M330 358 C280 358 220 330 180 306"/>
+  <polygon fill="var(--hi)" points="180,306 192,310 186,298"/>
+
+  <path class="dline hi" d="M160 250 V176"/>
+  <polygon fill="var(--hi)" points="160,176 154,186 166,186"/>
+
+  <path class="dline hi" d="M180 120 C220 90 280 58 330 58"/>
+  <polygon fill="var(--hi)" points="330,58 318,52 322,66"/>
+
+  <!-- monitor feeds spec - highlight feedback -->
+  <path class="dline bad dash" d="M160 250 C160 180 250 100 330 70"/>
+  <text class="dsub" x="200" y="110" fill="var(--bad)">monitoring writes</text>
+  <text class="dsub" x="200" y="126" fill="var(--bad)">the next requirement</text>
+
+  <!-- center -->
+  <rect class="dfill" x="300" y="165" width="220" height="90" rx="12"/>
+  <text class="dlabel" x="410" y="198" text-anchor="middle">One bot, six concepts</text>
+  <text class="dsub" x="410" y="222" text-anchor="middle">each stage leaves evidence</text>
+  <text class="dsub" x="410" y="240" text-anchor="middle">for the next requirement</text>
+</svg>
+<figcaption>Agent systems do not “ship and stop.” Rejections and tool traces in production are how you discover the requirements you missed.</figcaption>
+</figure>
+
+<h2>Why an agent project still needs a life cycle</h2>
+<p>
+It is tempting to treat an LLM demo as magic glue. It is not. The grocery bot is a small system with
+the same stages as any other:
+</p>
+<table>
+  <tr><th>Stage</th><th>In this repo</th><th>Evidence</th></tr>
+  <tr>
+    <td><strong>Spec</strong></td>
+    <td><code>SPEC</code> dict</td>
+    <td>Prompt, validator rules, acceptance criterion</td>
+  </tr>
+  <tr>
+    <td><strong>Build</strong></td>
+    <td><code>poc/bot.py</code> harness + mock model + tools</td>
+    <td>Runnable single file, tagged <code>[REQ][ARCH][LLM][OUT][MCP][LIFE]</code></td>
+  </tr>
+  <tr>
+    <td><strong>Test</strong></td>
+    <td><code>assert run()</code> under <code>__main__</code></td>
+    <td>Process exit code; printed REJECTED / ORDER / DONE trace</td>
+  </tr>
+  <tr>
+    <td><strong>Deploy</strong></td>
+    <td>Run the script; later a service or bot</td>
+    <td>Same gates still in front of tools</td>
+  </tr>
+  <tr>
+    <td><strong>Monitor</strong></td>
+    <td>Step logs from <code>run()</code></td>
+    <td>How often validation fails, which tools are used</td>
+  </tr>
+  <tr>
+    <td><strong>Iterate</strong></td>
+    <td>Edit <code>SPEC</code>, re-run the assert</td>
+    <td>New requirement derived from real traces</td>
+  </tr>
+</table>
+
+<h2>Test: the spec as an assertion</h2>
+<pre><code>if __name__ == "__main__":
+    print("tools:", [t["name"] for t in mcp_handle({"method": "tools/list"})["tools"]])
+    assert run(), "acceptance test failed: bot never reached done_when"
+    print("acceptance test passed -&gt;", SPEC["done_when"])</code></pre>
+<p>
+This is a tiny acceptance test:
+</p>
+<ul>
+  <li><strong>Given</strong> the SPEC and the mocked environment,</li>
+  <li><strong>When</strong> the agent loop runs (bounded),</li>
+  <li><strong>Then</strong> it must reach <code>done_when</code> (<code>order_placed</code>).</li>
+</ul>
+<p>
+Because <code>mock_llm</code> is deterministic, this is also a regression test. Break the validator,
+drop the error feedback, or remove tool routing and the assert fails.
+</p>
+
+<h2>Monitor: traces are requirements in disguise</h2>
+<p>
+Every step prints something useful:
+</p>
+<pre><code>[0] tool list_pantry -&gt; {...}
+[1] REJECTED: basket £10.70 is below minimum £50
+[2] ORDER OK -&gt; {'status': 'order_placed', 'total': 50.6}
+[3] DONE
+acceptance test passed -&gt; order_placed</code></pre>
+<p>
+In production those lines are your telemetry. Patterns that become the next <code>SPEC</code> entry:
+</p>
+<ul>
+  <li>Repeated identical rejections → the prompt is missing the rule the validator enforces.</li>
+  <li>Unknown-item errors → tool schema or catalog data is incomplete.</li>
+  <li>Hitting <code>max_steps</code> often → goal is underspecified or tools are insufficient.</li>
+  <li>Long, expensive histories → need summarisation or a tighter budget in <code>tokens()</code>.</li>
+</ul>
+
+<h2>Iterate: close the loop back to Spec</h2>
+<p>
+The dashed edge on the diagram is the important one. Monitoring does not end the project;
+it feeds <strong>requirements</strong>.
+</p>
+<div class="note">
+  <strong>Example:</strong> logs show 40% of runs reject for “too many lines” when users order bulky weeks.
+  That is not a model bug — it is a missing requirement. Add <code>max_lines: 24</code> (or a bulk mode) to
+  <code>SPEC</code>, let the validator and the prompt pick it up, and keep the same assert as the bar.
+</div>
+<p>
+Exercise 4 in the README is this stage in miniature: add per-step logging, write one new requirement from what you see.
+</p>
+
+<h2>Stage ↔ concept map</h2>
+<ul>
+  <li><a href="requirements.html">Understanding requirements</a> → Spec stage (and the start of Iterate).</li>
+  <li><a href="architecture.html">Agent architecture</a> / <a href="llm.html">LLM fundamentals</a> / <a href="output.html">Output handling</a> / <a href="mcp.html">MCP</a> → Build.</li>
+  <li><code>__main__</code> assert → Test.</li>
+  <li>Step prints and re-runs → Monitor.</li>
+  <li>New fields in <code>SPEC</code> → Iterate.</li>
+</ul>
+
+<h2>Exercises</h2>
+<ol>
+  <li>Break one gate (comment out the min-basket check). Does the assert still pass? Should it?</li>
+  <li>Add structured logging (<code>json.dumps</code> per step) suitable for a log aggregator.</li>
+  <li>Write a second assert for “never more than N rejections”. That is a quality requirement made executable.</li>
+  <li>List three signals you would monitor if this bot ran daily in a kitchen. What SPEC field would each one produce?</li>
+</ol>
+
+<h2>See also</h2>
+<ul>
+  <li><a href="requirements.html">Understanding requirements</a> — the hub the cycle returns to.</li>
+  <li><a href="architecture.html">Agent architecture</a> — the system under test.</li>
+  <li>Code: <code>poc/bot.py</code>, section <code>[LIFE]</code>.</li>
+</ul>
+
+<div class="pager">
+  <a href="mcp.html">← MCP dev</a>
+  <a class="next" href="index.html">Back to concept map →</a>
+</div>
+</body>
+</html>

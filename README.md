@@ -7,6 +7,17 @@ python poc/bot.py        # runs the bot and its acceptance test
 open index.html          # interactive concept map (enable GitHub Pages on main / root)
 ```
 
+Detail pages (each has an SVG diagram at the top):
+
+| Page | Concept |
+|---|---|
+| [requirements.html](requirements.html) | Understanding requirements |
+| [architecture.html](architecture.html) | Agent architecture |
+| [llm.html](llm.html) | LLM fundamentals |
+| [output.html](output.html) | Output handling |
+| [mcp.html](mcp.html) | MCP dev |
+| [lifecycle.html](lifecycle.html) | Systems life cycle |
+
 | Concept | Where in `poc/bot.py` | Links to |
 |---|---|---|
 | Understanding requirements | `SPEC` | becomes the prompt, the validator rules and the acceptance test |

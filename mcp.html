@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCP dev · Agent concepts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html">← Concept map</a>
+  <span class="sep">·</span>
+  <a href="architecture.html">Agent architecture</a>
+  <a href="mcp.html"><span class="muted">MCP dev</span></a>
+  <span class="sep">·</span>
+  <a href="output.html">Output handling</a>
+  <a href="lifecycle.html">Life cycle</a>
+</nav>
+
+<h1>MCP dev</h1>
+<p class="s"><code>mcp_handle()</code> — <code>tools/list</code> and <code>tools/call</code> give the loop a standard tool interface.</p>
+
+<figure>
+<svg class="diagram" viewBox="0 0 820 400" role="img" aria-label="MCP interface: tools list and tools call through mcp handle">
+  <!-- agent loop -->
+  <rect class="dbox hi" x="40" y="80" width="180" height="90" rx="10"/>
+  <text class="dlabel" x="130" y="112" text-anchor="middle">run() loop</text>
+  <text class="dsub" x="130" y="136" text-anchor="middle">needs tools but</text>
+  <text class="dsub" x="130" y="154" text-anchor="middle">must not depend on</text>
+
+  <!-- arrows to mcp_handle -->
+  <path class="dline hi" d="M230 110 H320"/>
+  <polygon fill="var(--hi)" points="320,110 310,104 310,116"/>
+  <text class="dcode" x="275" y="96" text-anchor="middle">tools/list</text>
+
+  <path class="dline hi" d="M230 150 H320"/>
+  <polygon fill="var(--hi)" points="320,150 310,144 310,156"/>
+  <text class="dcode" x="275" y="172" text-anchor="middle">tools/call</text>
+
+  <!-- mcp_handle -->
+  <rect class="dbox hi" x="330" y="90" width="180" height="90" rx="10"/>
+  <text class="dlabel" x="420" y="122" text-anchor="middle">mcp_handle(req)</text>
+  <text class="dsub" x="420" y="146" text-anchor="middle">JSON-shaped</text>
+  <text class="dsub" x="420" y="164" text-anchor="middle">protocol boundary</text>
+
+  <!-- two responses -->
+  <path class="dline ok" d="M520 115 H610"/>
+  <polygon fill="var(--ok)" points="610,115 600,109 600,121"/>
+  <text class="dcode" x="565" y="102" text-anchor="middle">tools</text>
+
+  <path class="dline ok" d="M520 155 H610"/>
+  <polygon fill="var(--ok)" points="610,155 600,149 600,161"/>
+  <text class="dcode" x="565" y="172" text-anchor="middle">content</text>
+
+  <!-- TOOLS registry -->
+  <rect class="dbox" x="620" y="60" width="170" height="160" rx="10"/>
+  <text class="dlabel" x="705" y="88" text-anchor="middle">TOOLS registry</text>
+  <rect class="dbox" x="640" y="105" width="130" height="42" rx="6"/>
+  <text class="dcode" x="705" y="122" text-anchor="middle">list_pantry</text>
+  <text class="dsub" x="705" y="138" text-anchor="middle">fn + inputSchema</text>
+  <rect class="dbox" x="640" y="155" width="130" height="42" rx="6"/>
+  <text class="dcode" x="705" y="172" text-anchor="middle">place_order</text>
+  <text class="dsub" x="705" y="188" text-anchor="middle">fn + inputSchema</text>
+
+  <!-- world -->
+  <rect class="dbox" x="330" y="260" width="460" height="90" rx="10"/>
+  <text class="dlabel" x="560" y="292" text-anchor="middle">side effects / data</text>
+  <text class="dsub" x="560" y="318" text-anchor="middle">PANTRY dict · PRICE dict · order status</text>
+  <text class="dsub" x="560" y="338" text-anchor="middle">reachable only through tool functions — not from model text</text>
+
+  <path class="dline" d="M705 220 V260"/>
+  <text class="dsub" x="720" y="245">fn()</text>
+
+  <!-- request/response examples -->
+  <rect class="dbox" x="40" y="260" width="250" height="110" rx="8"/>
+  <text class="dsub" x="165" y="284" text-anchor="middle">call shape</text>
+  <text class="dcode" x="55" y="308">{"method":"tools/call",</text>
+  <text class="dcode" x="55" y="326">"params":{"name":"list_pantry",</text>
+  <text class="dcode" x="55" y="344">"arguments":{}}}</text>
+</svg>
+<figcaption>One tiny RPC surface — discover tools, invoke tools — keeps the agent loop independent of pantry details.</figcaption>
+</figure>
+
+<h2>What MCP is for</h2>
+<p>
+The Model Context Protocol (and this PoC’s simplified mirror of it) answers a practical question:
+how does an agent use tools without hard-coding every tool into the loop?
+</p>
+<p>
+Two methods are enough to teach the idea:
+</p>
+<ol>
+  <li><strong><code>tools/list</code></strong> — what can you do? Returns names, descriptions, input schemas.</li>
+  <li><strong><code>tools/call</code></strong> — do this, with these arguments. Returns content the harness can observe.</li>
+</ol>
+
+<h2>The registry</h2>
+<pre><code>TOOLS = {
+ "list_pantry": {"description": "Current stock per item", "inputSchema": {"type": "object"},
+                 "fn": lambda a: PANTRY},
+ "place_order": {"description": "Order {item: qty}", "inputSchema": {"type": "object"},
+                 "fn": lambda a: {"status": "order_placed", "total": basket_total(a["basket"])}},
+}</code></pre>
+<p>
+Each entry is declarative metadata <em>plus</em> an implementation. The model only ever needs the metadata;
+the harness only ever calls <code>fn</code>.
+</p>
+
+<h2><code>mcp_handle()</code></h2>
+<pre><code>def mcp_handle(req):
+    if req["method"] == "tools/list":
+        return {"tools": [{"name": n, **{k: v for k, v in t.items() if k != "fn"}} for n, t in TOOLS.items()]}
+    t = TOOLS[req["params"]["name"]]
+    return {"content": t["fn"](req["params"]["arguments"])}</code></pre>
+<p>
+Note what it does on <code>tools/list</code>: it strips <code>fn</code>. Implementation stays server-side.
+The client (the agent loop) learns names and schemas, never Python callables.
+</p>
+
+<h2>Standard message shape</h2>
+<div class="cols">
+  <div class="box">
+    <h3>Discover</h3>
+    <pre><code>mcp_handle({"method": "tools/list"})</code></pre>
+    <p class="muted">→ <code>{"tools": [{name, description, inputSchema}, …]}</code></p>
+  </div>
+  <div class="box">
+    <h3>Invoke</h3>
+    <pre><code>mcp_handle({
+  "method": "tools/call",
+  "params": {
+    "name": "list_pantry",
+    "arguments": {}
+  }
+})</code></pre>
+    <p class="muted">→ <code>{"content": {...}}</code></p>
+  </div>
+</div>
+
+<h2>How the loop uses it</h2>
+<p>
+When a validated action is <code>tool</code> or <code>order</code>, the harness builds that same JSON-shaped request:
+</p>
+<pre><code>res = mcp_handle({"method": "tools/call",
+                  "params": {"name": out["name"], "arguments": out["arguments"]}})
+msgs.append({"role": "tool", "content": json.dumps(res["content"])})</code></pre>
+<p>
+Two consequences:
+</p>
+<ul>
+  <li>The model proposes <em>intent</em> (tool name + args), never raw side effects.</li>
+  <li>Tool results re-enter as observations — the same free-text discipline as model output, but produced by code.</li>
+</ul>
+
+<h2>Why a standard interface</h2>
+<div class="note">
+  <strong>Stable seam:</strong> tools can grow (prices, delivery slots, coupons) without changing <code>run()</code>.
+  The loop only knows two verbs: list and call.
+</div>
+<ul>
+  <li><strong>Swappable servers.</strong> Today an in-process dict; tomorrow a subprocess or HTTP server — same request shape.</li>
+  <li><strong>Model-friendly.</strong> <code>tools/list</code> is exactly what you paste into a system prompt or a tool-calling API field.</li>
+  <li><strong>Safe surface.</strong> Only registered tools run. A hallucinated tool name simply misses the registry.</li>
+</ul>
+
+<h2>Schemas matter</h2>
+<p>
+<code>inputSchema</code> is the contract for arguments. In production MCP this is JSON Schema; here it is a placeholder.
+Either way the lesson is the same: declare what a tool accepts so the model can form valid calls and the server can reject invalid ones.
+</p>
+<p>
+Compare with <a href="output.html">output handling</a>: model text is validated against <code>SPEC</code>;
+tool arguments would be validated against the schema. Same pattern at both boundaries.
+</p>
+
+<h2>Walkthrough</h2>
+<ol>
+  <li><code>__main__</code> prints <code>tools/list</code> → <code>['list_pantry', 'place_order']</code>.</li>
+  <li>Model asks for <code>list_pantry</code>. Harness calls <code>tools/call</code>. Pantry JSON goes into <code>msgs</code>.</li>
+  <li>Model emits an order. Harness routes <code>place_order</code> via the same handler.</li>
+  <li>Handler returns <code>{"status":"order_placed","total":…}</code>. Loop continues to <code>done</code>.</li>
+</ol>
+
+<h2>Exercises</h2>
+<ol>
+  <li>Add a <code>get_prices</code> tool. Keep it only reachable through <code>mcp_handle</code>.</li>
+  <li>Return an error-shaped content when a tool name is missing. What should the harness append?</li>
+  <li>Split <code>mcp_handle</code> into a separate module. How little of the loop has to change?</li>
+  <li>Draw the real MCP server you would write next — which of today’s dictionaries become remote state?</li>
+</ol>
+
+<h2>See also</h2>
+<ul>
+  <li><a href="architecture.html">Agent architecture</a> — where routing happens.</li>
+  <li><a href="output.html">Output handling</a> — parallel idea for model text.</li>
+  <li>Code: <code>poc/bot.py</code>, section <code>[MCP]</code>.</li>
+</ul>
+
+<div class="pager">
+  <a href="output.html">← Output handling</a>
+  <a class="next" href="lifecycle.html">Next: Systems life cycle →</a>
+</div>
+</body>
+</html>

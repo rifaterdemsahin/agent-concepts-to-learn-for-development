@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LLM fundamentals · Agent concepts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html">← Concept map</a>
+  <span class="sep">·</span>
+  <a href="architecture.html">Agent architecture</a>
+  <span class="muted">LLM fundamentals</span>
+  <span class="sep">·</span>
+  <a href="output.html">Output handling</a>
+  <a href="mcp.html">MCP dev</a>
+</nav>
+
+<h1>LLM fundamentals</h1>
+<p class="s"><code>mock_llm()</code>, <code>tokens()</code> — stateless, so the harness holds memory; free text, so output needs handling.</p>
+
+<figure>
+<svg class="diagram" viewBox="0 0 820 380" role="img" aria-label="Stateless model call: harness holds history, model returns free text">
+  <!-- harness memory -->
+  <rect class="dfill" x="40" y="40" width="280" height="300" rx="12"/>
+  <text class="dsub" x="180" y="64" text-anchor="middle">harness memory · msgs[]</text>
+
+  <rect class="dbox hi" x="70" y="85" width="220" height="48" rx="8"/>
+  <text class="dcode" x="180" y="106" text-anchor="middle">{"role":"user",</text>
+  <text class="dcode" x="180" y="122" text-anchor="middle">"content": SPEC JSON}</text>
+
+  <rect class="dbox" x="70" y="145" width="220" height="48" rx="8"/>
+  <text class="dcode" x="180" y="166" text-anchor="middle">{"role":"tool",</text>
+  <text class="dcode" x="180" y="182" text-anchor="middle">"content": pantry}</text>
+
+  <rect class="dbox" x="70" y="205" width="220" height="48" rx="8"/>
+  <text class="dcode" x="180" y="226" text-anchor="middle">{"role":"error",</text>
+  <text class="dcode" x="180" y="242" text-anchor="middle">"content": "below £50"}</text>
+
+  <rect class="dbox" x="70" y="265" width="220" height="48" rx="8"/>
+  <text class="dsub" x="180" y="286" text-anchor="middle">… appended every step</text>
+  <text class="dsub" x="180" y="302" text-anchor="middle">by the harness, not the model</text>
+
+  <!-- arrow to model -->
+  <path class="dline hi" d="M330 190 H420"/>
+  <polygon fill="var(--hi)" points="420,190 410,184 410,196"/>
+  <text class="dsub" x="375" y="168" text-anchor="middle">full history in</text>
+  <text class="dcode" x="375" y="212" text-anchor="middle">tokens &lt; 8000</text>
+
+  <!-- model box -->
+  <rect class="dbox" x="430" y="120" width="180" height="140" rx="10"/>
+  <text class="dlabel" x="520" y="155" text-anchor="middle">mock_llm(msgs)</text>
+  <text class="dsub" x="520" y="180" text-anchor="middle">no weights, no DB,</text>
+  <text class="dsub" x="520" y="198" text-anchor="middle">no session store</text>
+  <text class="dsub" x="520" y="220" text-anchor="middle">just f(messages) → text</text>
+
+  <!-- free text out -->
+  <path class="dline warn" stroke="var(--warn)" d="M620 190 H710"/>
+  <polygon fill="var(--warn)" points="710,190 700,184 700,196"/>
+  <text class="dsub" x="665" y="176" text-anchor="middle">free text out</text>
+
+  <rect class="dbox bad" x="720" y="130" width="70" height="120" rx="8"/>
+  <text class="dsub" x="755" y="165" text-anchor="middle" transform="rotate(90 755 165)">untrusted</text>
+  <text class="dsub" x="755" y="200" text-anchor="middle" transform="rotate(90 755 200)">needs parse()</text>
+
+  <!-- bottom notes -->
+  <rect class="dbox" x="430" y="290" width="360" height="50" rx="8"/>
+  <text class="dsub" x="610" y="312" text-anchor="middle">Stateless + free text  →  harness must own memory</text>
+  <text class="dsub" x="610" y="330" text-anchor="middle">and own output handling.</text>
+</svg>
+<figcaption>The model is a pure function from message list to string. Everything else — memory, tools, rules, retries — is harness.</figcaption>
+</figure>
+
+<h2>Two properties that shape every agent</h2>
+<div class="cols">
+  <div class="box">
+    <h3>Stateless</h3>
+    <p>
+      The model does not remember the previous turn. Every call receives the full message list.
+      If the harness forgets to append a tool result, the model will not know the tool ran.
+    </p>
+  </div>
+  <div class="box">
+    <h3>Free text out</h3>
+    <p>
+      The return value is a string — sometimes pure JSON, sometimes prose with a fenced block,
+      sometimes a polite apology. Structure is a convention you enforce, not a type the API guarantees.
+    </p>
+  </div>
+</div>
+
+<h2><code>tokens()</code> — the budget check</h2>
+<pre><code>def tokens(msgs):
+    return sum(len(m["content"]) for m in msgs) // 4   # ~4 chars/token</code></pre>
+<p>
+Real APIs charge by tokens and hard-fail past the context window. The mock does a cheap estimate
+and asserts early:
+</p>
+<pre><code>assert tokens(msgs) &lt; 8000, "context window exceeded"</code></pre>
+<p>
+You need this habit even with a mock: history only grows. A loop that appends tool results and errors
+will eventually fill any window unless you summarise, truncate, or stop.
+</p>
+
+<h2><code>mock_llm()</code> — a teaching stand-in</h2>
+<pre><code>def mock_llm(msgs, temperature=0):
+    """Stand-in for a real model. Sees the whole history every call (no memory)."""
+    assert tokens(msgs) &lt; 8000, "context window exceeded"
+    last = msgs[-1]
+    if last["role"] == "user":
+        return '{"action":"tool","name":"list_pantry","arguments":{}}'
+    if last["role"] == "tool" and "milk" in last["content"]:
+        bad = {"milk": 2, "yoghurt": 2, "rice": 1}      # first try ignores min basket
+        return "Sure!\n```json\n" + json.dumps({"action": "order", "basket": bad}) + "\n```"
+    if last["role"] == "error":
+        good = {"milk": 6, "yoghurt": 6, "rice": 4, "eggs": 6}
+        return json.dumps({"action": "order", "basket": good})
+    return json.dumps({"action": "done", "summary": last["content"]})</code></pre>
+<p>
+It is deliberately awkward in the right places:
+</p>
+<ul>
+  <li><strong>Stateless on purpose.</strong> It only looks at <code>msgs</code>, never at module globals for conversation state.</li>
+  <li><strong>Free text on purpose.</strong> One reply is wrapped in <code>Sure!</code> and a markdown fence — so <code>parse()</code> must cope.</li>
+  <li><strong>Wrong on purpose.</strong> The first basket is under £50, so you see a real reject → retry cycle.</li>
+</ul>
+<p>
+Swap this for <code>openai.chat.completions.create</code> or any other API and keep
+<code>parse</code> / <code>validate</code> / <code>run</code> unchanged. That is the test of a clean architecture.
+</p>
+
+<h2>What the harness must hold</h2>
+<table>
+  <tr><th>Concern</th><th>Model</th><th>Harness</th></tr>
+  <tr><td>Conversation memory</td><td>none</td><td><code>msgs[]</code> list</td></tr>
+  <tr><td>Tools</td><td>only names it is told</td><td><code>mcp_handle</code> + <code>TOOLS</code></td></tr>
+  <tr><td>Rules</td><td>prompted text</td><td><code>SPEC</code> + <code>validate()</code></td></tr>
+  <tr><td>Retries</td><td>next completion only</td><td><code>for step in range(max_steps)</code></td></tr>
+  <tr><td>Structure</td><td>best-effort text</td><td><code>parse()</code></td></tr>
+</table>
+
+<h2>A short experiment</h2>
+<p>
+Call the mock twice with the same arguments and compare. Identical. Now append one more message
+and call again. Different answer — because the <em>input</em> changed, not because the model learned.
+</p>
+<pre><code>a = mock_llm([{"role": "user", "content": "hello"}])
+b = mock_llm([{"role": "user", "content": "hello"}])
+assert a == b   # still stateless</code></pre>
+
+<h2>Why this matters for agent design</h2>
+<div class="note">
+  <strong>Architectural consequence:</strong> anything you want the agent to “know” next turn must be
+  explicitly written into the message list by the harness. Forgotten tool output is invisible.
+  Dropped errors will be retried as if they never happened.
+</div>
+<ul>
+  <li>Keep history append-only during a task; summarise when you near the budget.</li>
+  <li>Never assume the model saw a side effect — append the observation.</li>
+  <li>Always parse before acting. Free text is a sketch, not an API response.</li>
+</ul>
+
+<h2>Exercises</h2>
+<ol>
+  <li>Change the mock’s first basket so it passes validation. Which part of the demo disappears?</li>
+  <li>Make <code>tokens()</code> a real <code>len(text)//3</code> and feed a long SPEC. When does the assert fire?</li>
+  <li>Swap in a real API (or another mock) and prove <code>parse</code> / <code>validate</code> still work on both the fenced and unfenced replies.</li>
+</ol>
+
+<h2>See also</h2>
+<ul>
+  <li><a href="architecture.html">Agent architecture</a> — where this function sits in the loop.</li>
+  <li><a href="output.html">Output handling</a> — what to do with free text.</li>
+  <li>Code: <code>poc/bot.py</code>, section <code>[LLM]</code>.</li>
+</ul>
+
+<div class="pager">
+  <a href="architecture.html">← Agent architecture</a>
+  <a class="next" href="output.html">Next: Output handling →</a>
+</div>
+</body>
+</html>
