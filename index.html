@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent concepts map</title><style>
+:root{--bg:#fbfaf7;--fg:#1d2433;--mut:#5b6475;--ln:#c9ced9;--hi:#2a5bd7;--card:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#141821;--fg:#e8ebf2;--mut:#98a1b3;--ln:#3a4254;--hi:#7aa2ff;--card:#1c2230}}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 Georgia,serif;max-width:860px;margin-inline:auto;padding:24px}
+h1{font-size:1.6rem;margin:0 0 4px}p.s{color:var(--mut);margin:0 0 16px}
+svg{width:100%;height:auto}.n{cursor:pointer}.n rect{fill:var(--card);stroke:var(--ln);stroke-width:1.5}
+.n text{fill:var(--fg);font:14px system-ui;text-anchor:middle}.n.on rect,.n.rel rect{stroke:var(--hi);stroke-width:2.5}
+.n.dim{opacity:.35}line{stroke:var(--ln);stroke-width:1.5}line.on{stroke:var(--hi);stroke-width:2.5}
+#d{background:var(--card);border:1px solid var(--ln);border-radius:8px;padding:16px;min-height:150px}
+#d h2{margin:0 0 6px;font-size:1.1rem}code{font:13px ui-monospace,monospace;color:var(--hi)}
+button{font:inherit;background:none;border:0;color:var(--hi);text-decoration:underline;cursor:pointer;padding:0}
+</style></head><body>
+<h1>Six concepts, one bot</h1><p class="s">Click a concept. Its links light up. Example: a grocery bot and its harness (poc/bot.py).</p>
+<svg viewBox="0 0 800 330" id="g"></svg><div id="d"></div>
+<script>
+const C={
+REQ:{t:"Understanding requirements",x:130,y:60,c:"SPEC dict: min basket £50, restock below 2.",
+ l:{LIFE:"the spec becomes the acceptance test",OUT:"constraints become validator rules",ARCH:"goal and limits shape the loop"}},
+ARCH:{t:"Agent architecture",x:400,y:60,c:"run(): loop of model call, parse, validate, tool call, observe, bounded by max_steps.",
+ l:{LLM:"harness calls the model each step",OUT:"harness gates every model output",MCP:"harness routes tool calls"}},
+LIFE:{t:"Systems life cycle",x:670,y:60,c:"Spec, build, test (assert run()), deploy, monitor, iterate.",
+ l:{REQ:"monitoring finds missed requirements",ARCH:"each stage tests the loop"}},
+LLM:{t:"LLM fundamentals",x:130,y:260,c:"mock_llm(): stateless, sees full history, token budget checked each call.",
+ l:{OUT:"free text in, so output must be checked",ARCH:"harness supplies the memory"}},
+OUT:{t:"Output handling",x:400,y:260,c:"parse() then validate(). A bad basket returns an error message and the model retries.",
+ l:{REQ:"rules come from the spec",LLM:"errors go back as context"}},
+MCP:{t:"MCP dev",x:670,y:260,c:"mcp_handle(): tools/list and tools/call with JSON schemas.",
+ l:{ARCH:"standard tool interface for the loop",OUT:"tool results are outputs too"}}};
+const g=document.getElementById('g'),d=document.getElementById('d'),ns='http://www.w3.org/2000/svg';
+const E=[];for(const a in C)for(const b in C[a].l)if(!E.some(e=>e[0]==b&&e[1]==a))E.push([a,b]);
+E.forEach(([a,b])=>{const l=document.createElementNS(ns,'line');l.dataset.k=a+b;
+ l.setAttribute('x1',C[a].x);l.setAttribute('y1',C[a].y);l.setAttribute('x2',C[b].x);l.setAttribute('y2',C[b].y);g.appendChild(l)});
+for(const k in C){const n=document.createElementNS(ns,'g');n.setAttribute('class','n');n.id='n'+k;n.setAttribute('tabindex',0);
+ n.innerHTML=`<rect x="${C[k].x-85}" y="${C[k].y-24}" width="170" height="48" rx="8"/><text x="${C[k].x}" y="${C[k].y+5}">${C[k].t}</text>`;
+ n.onclick=()=>pick(k);n.onkeydown=e=>e.key=='Enter'&&pick(k);g.appendChild(n)}
+function pick(k){const rel=Object.keys(C[k].l);
+ for(const j in C){const n=document.getElementById('n'+j);n.setAttribute('class','n '+(j==k?'on':rel.includes(j)?'rel':'dim'))}
+ g.querySelectorAll('line').forEach(l=>l.classList.toggle('on',l.dataset.k.includes(k)));
+ d.innerHTML=`<h2>${C[k].t}</h2><p>${C[k].c}</p><ul>`+rel.map(r=>`<li>${C[r].t}: ${C[k].l[r]} (<button onclick="pick('${r}')">open</button>)</li>`).join('')+`</ul><p>Code: <code>poc/bot.py</code>, section [${k}]</p>`}
+pick('ARCH');
+</script></body></html>
