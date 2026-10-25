@@ -3,22 +3,50 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agent architecture · Agent concepts</title>
+<title>🏗️ Agent Architecture · Agent Concepts</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-  <a href="index.html">← Concept map</a>
+  <a href="index.html">🗺️ Concept Map</a>
   <span class="sep">·</span>
-  <a href="requirements.html">Requirements</a>
-  <span class="muted">Agent architecture</span>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <a href="timeline.html">⏳ Timeline</a>
   <span class="sep">·</span>
-  <a href="llm.html">LLM fundamentals</a>
-  <a href="mcp.html">MCP dev</a>
+  <a href="requirements.html">📋 Requirements</a>
+  <span class="muted">🏗️ Architecture</span>
+  <a href="llm.html">🧠 LLM</a>
+  <a href="output.html">🛡️ Output</a>
+  <a href="mcp.html">🔌 MCP</a>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
 </nav>
 
-<h1>Agent architecture</h1>
-<p class="s"><code>run()</code> loop: calls the LLM, gates output, routes tools — a bounded harness around a stateless model.</p>
+<h1>🏗️ Agent Architecture: The Bounded Harness</h1>
+<p class="s"><code>run()</code> execution loop: invokes the LLM, parses syntax, gates output, routes tools — a bounded harness enclosing a stateless model.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: Anatomy of the Agent Runtime Harness</strong>
+    <span class="badge ok">Deterministic Controller</span>
+  </div>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>🧠 1. The Reasoning Unit</strong>
+      <p>Stateless model receives complete conversation memory <code>msgs[]</code> on every invocation.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🛡️ 2. The Verification Gate</strong>
+      <p>Deterministic parser & business validator intercept every proposal before executing actions.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🛑 3. Safe Bounded Scope</strong>
+      <p>Strict step count (<code>max_steps=8</code>) prevents endless wandering and cost blowouts.</p>
+    </div>
+  </div>
+</div>
 
 <figure>
 <svg class="diagram" viewBox="0 0 820 420" role="img" aria-label="run loop architecture: model call, parse, validate, route, observe">
@@ -28,21 +56,21 @@
 
   <!-- step boxes in a loop -->
   <rect class="dbox hi" x="120" y="80" width="150" height="52" rx="8"/>
-  <text class="dlabel" x="195" y="102" text-anchor="middle">1 · mock_llm(msgs)</text>
+  <text class="dlabel" x="195" y="102" text-anchor="middle">1 · 🧠 mock_llm(msgs)</text>
   <text class="dsub" x="195" y="120" text-anchor="middle">call the model</text>
 
   <path class="dline hi" d="M280 106 H330"/>
   <polygon fill="var(--hi)" points="330,106 320,100 320,112"/>
 
   <rect class="dbox" x="340" y="80" width="140" height="52" rx="8"/>
-  <text class="dlabel" x="410" y="102" text-anchor="middle">2 · parse(raw)</text>
+  <text class="dlabel" x="410" y="102" text-anchor="middle">2 · 🔍 parse(raw)</text>
   <text class="dsub" x="410" y="120" text-anchor="middle">free text → JSON</text>
 
   <path class="dline hi" d="M490 106 H540"/>
   <polygon fill="var(--hi)" points="540,106 530,100 530,112"/>
 
   <rect class="dbox" x="550" y="80" width="150" height="52" rx="8"/>
-  <text class="dlabel" x="625" y="102" text-anchor="middle">3 · validate(out)</text>
+  <text class="dlabel" x="625" y="102" text-anchor="middle">3 · 🛡️ validate(out)</text>
   <text class="dsub" x="625" y="120" text-anchor="middle">gate against SPEC</text>
 
   <!-- decision diamond-ish -->
@@ -54,7 +82,7 @@
   <text class="dsub" x="490" y="172" text-anchor="middle" fill="var(--bad)">error role appended</text>
 
   <rect class="dbox bad" x="250" y="160" width="150" height="42" rx="8"/>
-  <text class="dlabel" x="325" y="186" text-anchor="middle">msgs ← error</text>
+  <text class="dlabel" x="325" y="186" text-anchor="middle">msgs ← ⚠️ error</text>
 
   <!-- retry loop back -->
   <path class="dline bad dash" d="M250 181 C180 181 140 220 140 260 C140 300 160 320 195 320"/>
@@ -198,8 +226,8 @@ This tiny vocabulary is enough. The model learns the contract from the history t
 </ul>
 
 <div class="pager">
-  <a href="requirements.html">← Understanding requirements</a>
-  <a class="next" href="llm.html">Next: LLM fundamentals →</a>
+  <a href="requirements.html">← 📋 Understanding Requirements</a>
+  <a class="next" href="llm.html">Next: 🧠 LLM Fundamentals →</a>
 </div>
 </body>
 </html>

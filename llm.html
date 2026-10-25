@@ -3,28 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LLM fundamentals · Agent concepts</title>
+<title>🧠 LLM Fundamentals · Agent Concepts</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-  <a href="index.html">← Concept map</a>
+  <a href="index.html">🗺️ Concept Map</a>
   <span class="sep">·</span>
-  <a href="architecture.html">Agent architecture</a>
-  <span class="muted">LLM fundamentals</span>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <a href="timeline.html">⏳ Timeline</a>
   <span class="sep">·</span>
-  <a href="output.html">Output handling</a>
-  <a href="mcp.html">MCP dev</a>
+  <a href="requirements.html">📋 Requirements</a>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <span class="muted">🧠 LLM</span>
+  <a href="output.html">🛡️ Output</a>
+  <a href="mcp.html">🔌 MCP</a>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
 </nav>
 
-<h1>LLM fundamentals</h1>
-<p class="s"><code>mock_llm()</code>, <code>tokens()</code> — stateless, so the harness holds memory; free text, so output needs handling.</p>
+<h1>🧠 LLM Fundamentals in Agent Systems</h1>
+<p class="s"><code>mock_llm()</code>, <code>tokens()</code> — completely stateless: the harness preserves memory; stochastic free text requires structured extraction.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: The Nature of Large Language Models</strong>
+    <span class="badge req">Stateless Next-Token Predictor</span>
+  </div>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>📭 Zero Internal Memory</strong>
+      <p>The model holds no session state. The harness must resend all previous turns in <code>msgs[]</code> every single step.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🧮 Finite Context Budget</strong>
+      <p>Tokens cost compute and money. Pre-flight checks (<code>tokens(msgs) &lt; 8000</code>) protect against catastrophic overflow.</p>
+    </div>
+    <div class="info-chip">
+      <strong>💬 Unstructured Output</strong>
+      <p>The model speaks human natural language. The harness must isolate and parse machine-readable JSON payloads.</p>
+    </div>
+  </div>
+</div>
 
 <figure>
 <svg class="diagram" viewBox="0 0 820 380" role="img" aria-label="Stateless model call: harness holds history, model returns free text">
   <!-- harness memory -->
   <rect class="dfill" x="40" y="40" width="280" height="300" rx="12"/>
-  <text class="dsub" x="180" y="64" text-anchor="middle">harness memory · msgs[]</text>
+  <text class="dsub" x="180" y="64" text-anchor="middle">harness memory · 📦 msgs[]</text>
 
   <rect class="dbox hi" x="70" y="85" width="220" height="48" rx="8"/>
   <text class="dcode" x="180" y="106" text-anchor="middle">{"role":"user",</text>
@@ -50,7 +78,7 @@
 
   <!-- model box -->
   <rect class="dbox" x="430" y="120" width="180" height="140" rx="10"/>
-  <text class="dlabel" x="520" y="155" text-anchor="middle">mock_llm(msgs)</text>
+  <text class="dlabel" x="520" y="155" text-anchor="middle">🧠 mock_llm(msgs)</text>
   <text class="dsub" x="520" y="180" text-anchor="middle">no weights, no DB,</text>
   <text class="dsub" x="520" y="198" text-anchor="middle">no session store</text>
   <text class="dsub" x="520" y="220" text-anchor="middle">just f(messages) → text</text>
@@ -58,7 +86,7 @@
   <!-- free text out -->
   <path class="dline warn" stroke="var(--warn)" d="M620 190 H710"/>
   <polygon fill="var(--warn)" points="710,190 700,184 700,196"/>
-  <text class="dsub" x="665" y="176" text-anchor="middle">free text out</text>
+  <text class="dsub" x="665" y="176" text-anchor="middle">💬 free text out</text>
 
   <rect class="dbox bad" x="720" y="130" width="70" height="120" rx="8"/>
   <text class="dsub" x="755" y="165" text-anchor="middle" transform="rotate(90 755 165)">untrusted</text>
@@ -176,8 +204,8 @@ assert a == b   # still stateless</code></pre>
 </ul>
 
 <div class="pager">
-  <a href="architecture.html">← Agent architecture</a>
-  <a class="next" href="output.html">Next: Output handling →</a>
+  <a href="architecture.html">← 🏗️ Agent Architecture</a>
+  <a class="next" href="output.html">Next: 🛡️ Output Handling →</a>
 </div>
 </body>
 </html>

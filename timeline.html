@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⏳ Timeline of Events in Agent Systems · Agent Concepts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html">🗺️ Concept Map</a>
+  <span class="sep">·</span>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <span class="sep">·</span>
+  <span class="muted">⏳ Timeline</span>
+  <span class="sep">·</span>
+  <a href="requirements.html">📋 Requirements</a>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <a href="llm.html">🧠 LLM</a>
+  <a href="output.html">🛡️ Output</a>
+  <a href="mcp.html">🔌 MCP</a>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
+</nav>
+
+<h1>⏳ Timeline of Events in Agent Systems</h1>
+<p class="s">Numbered chronological sequence of every event from spec design to runtime self-correction and production monitoring.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: The 12-Stage Agent Event Horizon</strong>
+    <span class="badge ok">Chronological Execution Order</span>
+  </div>
+
+  <svg class="diagram" viewBox="0 0 820 220" role="img" aria-label="12-Stage Timeline: Design to Runtime Loop to Acceptance">
+    <!-- Phase 1: Setup -->
+    <rect class="dfill" x="20" y="25" width="230" height="170" rx="10"/>
+    <text class="dlabel" x="135" y="50" text-anchor="middle">Phase A: Setup & Spec</text>
+    <rect class="dbox hi" x="35" y="65" width="200" height="36" rx="6"/>
+    <text class="dcode" x="135" y="88" text-anchor="middle">1. 🎯 Define SPEC dict</text>
+    <rect class="dbox" x="35" y="110" width="200" height="36" rx="6"/>
+    <text class="dcode" x="135" y="133" text-anchor="middle">2. 🔌 Register MCP Tools</text>
+    <rect class="dbox" x="35" y="155" width="200" height="36" rx="6"/>
+    <text class="dcode" x="135" y="178" text-anchor="middle">3. 📦 Init msgs[] Memory</text>
+
+    <!-- Connector arrow A -> B -->
+    <path class="dline hi" d="M255 110 H290"/>
+    <polygon fill="var(--hi)" points="290,110 280,104 280,116"/>
+
+    <!-- Phase 2: Runtime Loop -->
+    <rect class="dfill ok" x="295" y="25" width="260" height="170" rx="10"/>
+    <text class="dlabel" x="425" y="50" text-anchor="middle">Phase B: Runtime Loop</text>
+    <rect class="dbox" x="310" y="65" width="230" height="26" rx="4"/>
+    <text class="dcode" x="425" y="83" text-anchor="middle">4. ⏱️ Pre-flight Token Audit</text>
+    <rect class="dbox hi" x="310" y="96" width="230" height="26" rx="4"/>
+    <text class="dcode" x="425" y="114" text-anchor="middle">5. 🧠 LLM Inference Step</text>
+    <rect class="dbox" x="310" y="127" width="230" height="26" rx="4"/>
+    <text class="dcode" x="425" y="145" text-anchor="middle">6. 🔍 Regex JSON Parsing</text>
+    <rect class="dbox bad" x="310" y="158" width="230" height="26" rx="4"/>
+    <text class="dcode" x="425" y="176" text-anchor="middle">7. 🛡️ Validate & 8. 🔄 Retry</text>
+
+    <!-- Connector arrow B -> C -->
+    <path class="dline hi" d="M560 110 H595"/>
+    <polygon fill="var(--hi)" points="595,110 585,104 585,116"/>
+
+    <!-- Phase 3: Actuation & Lifecycle -->
+    <rect class="dfill" x="600" y="25" width="200" height="170" rx="10"/>
+    <text class="dlabel" x="700" y="50" text-anchor="middle">Phase C: Goal & Monitor</text>
+    <rect class="dbox ok" x="615" y="65" width="170" height="36" rx="6"/>
+    <text class="dcode" x="700" y="88" text-anchor="middle">9. 🛠️ MCP Tool Call</text>
+    <rect class="dbox" x="615" y="110" width="170" height="36" rx="6"/>
+    <text class="dcode" x="700" y="133" text-anchor="middle">10. 👁️ Ingest Tool State</text>
+    <rect class="dbox hi" x="615" y="155" width="170" height="36" rx="6"/>
+    <text class="dcode" x="700" y="178" text-anchor="middle">11. 🏁 Goal & 12. 📊 Iteration</text>
+  </svg>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>🔢 Sequential Invariants</strong>
+      <p>An agent cannot parse before model output, cannot act before validation, and cannot succeed without acceptance verification.</p>
+    </div>
+    <div class="info-chip">
+      <strong>⚡ The Feedback Nexus</strong>
+      <p>Events 7 and 8 form the critical self-correction pivot: a failed validation routes directly back to step 5 without human intervention.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🔄 The Outer Loop</strong>
+      <p>Event 12 feeds back into Event 1: production logs reveal real-world edge cases that update the original SPEC dictionary.</p>
+    </div>
+  </div>
+</div>
+
+<h2>📋 The 12 Numbered Events in Detail</h2>
+
+<div class="timeline">
+  <!-- Event 1 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">1</div>
+    <div class="timeline-card">
+      <h3>🎯 Event 1: Define the Executable Specification <span class="timeline-tag">Phase: Design</span></h3>
+      <p>
+        The developer defines business rules and boundary constraints in a single structured dictionary (<code>SPEC</code> in <code>poc/bot.py</code>). This dictionary is the single source of truth that will drive the prompt, the runtime validator, and the CI acceptance test.
+      </p>
+      <pre><code>SPEC = {"goal": "restock low items", "min_basket_gbp": 50, "max_lines": 12,
+        "low_stock_below": 2, "done_when": "order_placed"}</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 2 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">2</div>
+    <div class="timeline-card">
+      <h3>🔌 Event 2: Expose MCP Tool Capabilities <span class="timeline-tag">Phase: Integration</span></h3>
+      <p>
+        Tools are registered with strict JSON schemas on the Model Context Protocol server. The agent loop inspects available tools via <code>tools/list</code> without knowing internal database details.
+      </p>
+      <pre><code>TOOLS = {
+  "list_pantry": {"description": "Current stock per item", "inputSchema": {"type": "object"}},
+  "place_order": {"description": "Order {item: qty}", "inputSchema": {"type": "object"}}
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 3 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">3</div>
+    <div class="timeline-card">
+      <h3>📦 Event 3: Initialize Harness Context Memory <span class="timeline-tag">Phase: Session Start</span></h3>
+      <p>
+        Because the LLM is completely stateless, the harness instantiates a working memory transcript array <code>msgs</code> and seeds it with the serialized <code>SPEC</code> prompt.
+      </p>
+      <pre><code>msgs = [{"role": "user", "content": json.dumps(SPEC)}]</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 4 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">4</div>
+    <div class="timeline-card">
+      <h3>⏱️ Event 4: Pre-Flight Budget & Safety Audit <span class="timeline-tag">Phase: Loop Guard</span></h3>
+      <p>
+        Before invoking the neural network, the harness conducts a sanity check on the token count (<code>tokens(msgs) &lt; 8000</code>) and checks that current iteration has not exceeded <code>max_steps</code>.
+      </p>
+      <pre><code>assert tokens(msgs) &lt; 8000, "context window exceeded"</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 5 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">5</div>
+    <div class="timeline-card">
+      <h3>🧠 Event 5: Stochastic LLM Inference <span class="timeline-tag">Phase: Reasoning</span></h3>
+      <p>
+        The complete transcript is sent to the LLM. The model computes next-token probability distributions across its transformer layers and outputs a text string containing conversational prose and an embedded JSON payload.
+      </p>
+      <pre><code>raw = mock_llm(msgs)  # e.g. "Sure!\n```json\n{"action":"order", ...}\n```"</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 6 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">6</div>
+    <div class="timeline-card">
+      <h3>🔍 Event 6: Extraction & Syntax Parsing <span class="timeline-tag">Phase: Parsing</span></h3>
+      <p>
+        The harness uses regular expressions to extract structured JSON from the conversational noise and decodes it into a Python dictionary. If extraction fails, a syntax error is recorded.
+      </p>
+      <pre><code>def parse(text):
+    m = re.search(r"\{.*\}", text, re.S)
+    if not m: raise ValueError("no JSON found")
+    return json.loads(m.group(0))</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 7 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">7</div>
+    <div class="timeline-card">
+      <h3>🛡️ Event 7: Deterministic Constraint Validation <span class="timeline-tag">Phase: Safety Gate</span></h3>
+      <p>
+        The harness passes the parsed object through <code>validate()</code>. In <code>poc/bot.py</code> step 1, the model proposes a £10.20 basket. The validator detects that £10.20 &lt; £50 minimum requirement and triggers a rejection.
+      </p>
+      <pre><code>if basket_total(b) &lt; SPEC['min_basket_gbp']:
+    return f"basket £{basket_total(b)} is below minimum £{SPEC['min_basket_gbp']}"</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 8 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">8</div>
+    <div class="timeline-card">
+      <h3>🔄 Event 8: Closed-Loop Error Feedback & Retry <span class="timeline-tag">Phase: Self-Correction</span></h3>
+      <p>
+        Crucial cybernetic pivot: instead of terminating, the harness appends the rejection message as <code>{"role": "error", "content": err}</code> into <code>msgs</code> and proceeds to the next loop iteration. The model reads the error and adjusts its basket on the next step.
+      </p>
+      <pre><code>print(f"[{step}] REJECTED: {err}")
+msgs.append({"role": "error", "content": err})
+continue</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 9 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">9</div>
+    <div class="timeline-card">
+      <h3>🛠️ Event 9: Protocol Tool Execution <span class="timeline-tag">Phase: Actuation</span></h3>
+      <p>
+        Once an output passes all validation gates, the harness calls the MCP server using standard JSON-RPC protocol (<code>tools/call</code> with name and arguments).
+      </p>
+      <pre><code>res = mcp_handle({"method": "tools/call", "params": {"name": "place_order", "arguments": {"basket": out["basket"]}}})</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 10 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">10</div>
+    <div class="timeline-card">
+      <h3>👁️ Event 10: State Ingestion & Observation Update <span class="timeline-tag">Phase: Observation</span></h3>
+      <p>
+        The result returned by the tool (<code>{"status": "order_placed", "total": 50.6}</code>) is appended to <code>msgs</code> with <code>role: tool</code>. The agent's working memory now records that the order succeeded.
+      </p>
+      <pre><code>msgs.append({"role": "tool", "content": json.dumps(res["content"])})</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 11 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">11</div>
+    <div class="timeline-card">
+      <h3>🏁 Event 11: Termination & Acceptance Assertion <span class="timeline-tag">Phase: Verification</span></h3>
+      <p>
+        The loop detects <code>action: done</code> matching <code>SPEC["done_when"]</code>. The test harness verifies the final state with <code>assert run()</code>. CI/CD passes.
+      </p>
+      <pre><code>assert run(), "acceptance test failed: bot never reached done_when"
+print("acceptance test passed ->", SPEC["done_when"])</code></pre>
+    </div>
+  </div>
+
+  <!-- Event 12 -->
+  <div class="timeline-item">
+    <div class="timeline-dot">12</div>
+    <div class="timeline-card">
+      <h3>📊 Event 12: Production Telemetry & Specification Iteration <span class="timeline-tag">Phase: Evolution</span></h3>
+      <p>
+        In production, telemetry tracks reject rates, step counts, and token costs. When unexpected edge cases appear (e.g. out-of-stock items, price fluctuations), they are formulated into new constraints in <code>SPEC</code>, restarting the cycle at Event 1.
+      </p>
+      <pre><code># Telemetry insight: "Eggs out of stock" -> Add constraint: "substitute_allowed: true"</code></pre>
+    </div>
+  </div>
+</div>
+
+<div class="pager">
+  <div class="prev"><a href="sanity-check.html">← 🔬 Sanity Check & Guardrails</a></div>
+  <div class="next"><a href="requirements.html">📋 Requirements Deep Dive →</a></div>
+</div>
+
+</body>
+</html>

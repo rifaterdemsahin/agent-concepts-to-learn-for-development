@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚛️ First Principles of Agentic Systems · Agent Concepts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html">🗺️ Concept Map</a>
+  <span class="sep">·</span>
+  <span class="muted">⚛️ First Principles</span>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <a href="timeline.html">⏳ Timeline</a>
+  <span class="sep">·</span>
+  <a href="requirements.html">📋 Requirements</a>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <a href="llm.html">🧠 LLM</a>
+  <a href="output.html">🛡️ Output</a>
+  <a href="mcp.html">🔌 MCP</a>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
+</nav>
+
+<h1>⚛️ First Principles of Agentic Systems</h1>
+<p class="s">Deconstructing autonomous agents to computational physics: why models reason, harnesses act, and feedback closes the loop.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: The Anatomy of Agency</strong>
+    <span class="badge req">The Core Equation</span>
+  </div>
+
+  <svg class="diagram" viewBox="0 0 820 230" role="img" aria-label="First Principles of an Agent: Goal + Memory + Model + Guardrails + Tools">
+    <!-- Equation Parts -->
+    <!-- 1. Spec -->
+    <rect class="dbox hi" x="20" y="30" width="130" height="90" rx="8"/>
+    <text class="dlabel" x="85" y="62" text-anchor="middle">🎯 Objective</text>
+    <text class="dcode" x="85" y="86" text-anchor="middle">SPEC Dict</text>
+    <text class="dsub" x="85" y="104" text-anchor="middle">The "Why"</text>
+
+    <text class="dlabel" x="165" y="80" text-anchor="middle" font-size="20">+</text>
+
+    <!-- 2. Memory -->
+    <rect class="dbox" x="180" y="30" width="130" height="90" rx="8"/>
+    <text class="dlabel" x="245" y="62" text-anchor="middle">📦 Memory</text>
+    <text class="dcode" x="245" y="86" text-anchor="middle">msgs[] State</text>
+    <text class="dsub" x="245" y="104" text-anchor="middle">Context</text>
+
+    <text class="dlabel" x="325" y="80" text-anchor="middle" font-size="20">+</text>
+
+    <!-- 3. LLM -->
+    <rect class="dbox" x="340" y="30" width="130" height="90" rx="8"/>
+    <text class="dlabel" x="405" y="62" text-anchor="middle">🧠 Intelligence</text>
+    <text class="dcode" x="405" y="86" text-anchor="middle">Stateless LLM</text>
+    <text class="dsub" x="405" y="104" text-anchor="middle">Reasoning</text>
+
+    <text class="dlabel" x="485" y="80" text-anchor="middle" font-size="20">+</text>
+
+    <!-- 4. Guardrails -->
+    <rect class="dbox bad" x="500" y="30" width="130" height="90" rx="8"/>
+    <text class="dlabel" x="565" y="62" text-anchor="middle">🛡️ Guardrails</text>
+    <text class="dcode" x="565" y="86" text-anchor="middle">validate()</text>
+    <text class="dsub" x="565" y="104" text-anchor="middle">Safety Invariants</text>
+
+    <text class="dlabel" x="645" y="80" text-anchor="middle" font-size="20">+</text>
+
+    <!-- 5. Actuators -->
+    <rect class="dbox ok" x="660" y="30" width="140" height="90" rx="8"/>
+    <text class="dlabel" x="730" y="62" text-anchor="middle">🔌 Actuators</text>
+    <text class="dcode" x="730" y="86" text-anchor="middle">MCP Tools</text>
+    <text class="dsub" x="730" y="104" text-anchor="middle">Real World Action</text>
+
+    <!-- Bottom summary banner -->
+    <rect class="dfill ok" x="20" y="145" width="780" height="65" rx="8"/>
+    <text class="dlabel" x="410" y="172" text-anchor="middle" font-weight="600">⚡ Emergent Result: The Autonomous Agent Harness</text>
+    <text class="dsub" x="410" y="194" text-anchor="middle">The model supplies probabilistic reasoning; the deterministic harness coordinates execution, bounds, and state.</text>
+  </svg>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>⚛️ Fundamental Law 1</strong>
+      <p>LLMs have zero volition or memory. They are pure mathematical functions transforming text tokens into text tokens.</p>
+    </div>
+    <div class="info-chip">
+      <strong>⚙️ Fundamental Law 2</strong>
+      <p>Agency is an illusion created by the harness loop. The Python loop supplies the memory, tools, and execution momentum.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🔄 Fundamental Law 3</strong>
+      <p>Autonomous capability requires closed-loop feedback. Without sensing errors and self-correcting, an agent is just a script.</p>
+    </div>
+  </div>
+</div>
+
+<h2>📖 The 6 First Principles of Autonomous Agents</h2>
+
+<div class="principle-grid">
+  <div class="principle-card">
+    <h3>1. 🧠 Statelessness of the Brain</h3>
+    <p>
+      An LLM weights matrix $W$ is static. Between inference calls, it stores <strong>zero state</strong>. Every query is a fresh matrix multiplication:
+    </p>
+    <code>y = f(W · x)</code>
+    <p class="principle-quote">
+      "If you do not pass history back into the prompt, the model has complete amnesia. The harness is the keeper of time."
+    </p>
+  </div>
+
+  <div class="principle-card">
+    <h3>2. 🏗️ The Harness is the Agent</h3>
+    <p>
+      People call the LLM the "agent", but scientifically the LLM is just a CPU. The agent is the <strong>harness runtime</strong>: the code that manages the loop, calls APIs, handles errors, and terminates.
+    </p>
+    <p class="principle-quote">
+      "The LLM provides the cognitive leaps; the software harness provides the agency, responsibility, and boundaries."
+    </p>
+  </div>
+
+  <div class="principle-card">
+    <h3>3. 🛡️ Deterministic Gating of Probabilistic Output</h3>
+    <p>
+      Because models operate on probability distributions, they will inevitably output out-of-spec data. You cannot stop this with clever phrasing alone.
+    </p>
+    <p class="principle-quote">
+      "Never let stochastic models make unmonitored commits to real databases. Hard validation code must hold the keys."
+    </p>
+  </div>
+
+  <div class="principle-card">
+    <h3>4. 🔄 Cybernetics & Error Correction</h3>
+    <p>
+      Wiener's Cybernetics defines control as sensing deviation from a goal and applying corrective force. When <code>validate()</code> catches an under-budget basket, the error signal reorients the model.
+    </p>
+    <p class="principle-quote">
+      "Intelligence without a feedback loop is merely gambling. True resilience comes from self-correcting on error."
+    </p>
+  </div>
+
+  <div class="principle-card">
+    <h3>5. 🔌 Protocol Decoupling (MCP)</h3>
+    <p>
+      An agent must not be hardcoded to specific database drivers or vendor SDKs. By abstracting tools into JSON-RPC interfaces (like Model Context Protocol), the reasoning engine remains modular.
+    </p>
+    <p class="principle-quote">
+      "Standardize the tool protocol so the agent's logic survives when tools, databases, or models change."
+    </p>
+  </div>
+
+  <div class="principle-card">
+    <h3>6. 🏁 Bounded Exploration & Termination</h3>
+    <p>
+      Turing's Halting Problem dictates that an autonomous agent cannot be proven to stop unless the runtime imposes an external bound: <code>max_steps</code>.
+    </p>
+    <p class="principle-quote">
+      "Every production agent must have a finite budget: max tokens, max steps, and timeout boundaries."
+    </p>
+  </div>
+</div>
+
+<h2>⚖️ First Principles Comparison</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Dimension</th>
+      <th>Traditional Software</th>
+      <th>LLM Chatbot</th>
+      <th>Autonomous Agent Harness</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>State</strong></td>
+      <td>Variables & database records</td>
+      <td>Session cookies in UI</td>
+      <td><code>msgs[]</code> context array managed by harness</td>
+    </tr>
+    <tr>
+      <td><strong>Control Flow</strong></td>
+      <td>Deterministic if/else statements</td>
+      <td>Single-turn request/response</td>
+      <td>Closed-loop iterative <code>while</code> loop with tool feedback</td>
+    </tr>
+    <tr>
+      <td><strong>Environment Effect</strong></td>
+      <td>Direct programmatic execution</td>
+      <td>None (read-only text conversation)</td>
+      <td>Actuation via standardized protocol tools (MCP)</td>
+    </tr>
+    <tr>
+      <td><strong>Failure Handling</strong></td>
+      <td>Exceptions & stack traces</td>
+      <td>Apologetic conversational responses</td>
+      <td>Interception, semantic error feedback, and automated retry</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="pager">
+  <div class="prev"><a href="index.html">← 🗺️ Concept Map</a></div>
+  <div class="next"><a href="sanity-check.html">🔬 Sanity Check & Guardrails →</a></div>
+</div>
+
+</body>
+</html>

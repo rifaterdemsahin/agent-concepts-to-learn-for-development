@@ -3,28 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Understanding requirements · Agent concepts</title>
+<title>📋 Understanding Requirements · Agent Concepts</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-  <a href="index.html">← Concept map</a>
+  <a href="index.html">🗺️ Concept Map</a>
   <span class="sep">·</span>
-  <span class="muted">Understanding requirements</span>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <a href="timeline.html">⏳ Timeline</a>
   <span class="sep">·</span>
-  <a href="architecture.html">Agent architecture</a>
-  <a href="output.html">Output handling</a>
-  <a href="lifecycle.html">Life cycle</a>
+  <span class="muted">📋 Requirements</span>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <a href="llm.html">🧠 LLM</a>
+  <a href="output.html">🛡️ Output</a>
+  <a href="mcp.html">🔌 MCP</a>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
 </nav>
 
-<h1>Understanding requirements</h1>
-<p class="s"><code>SPEC</code> becomes the prompt, the validator rules, and the acceptance test — one source of truth, three consumers.</p>
+<h1>📋 Understanding Requirements in Agent Systems</h1>
+<p class="s"><code>SPEC</code> becomes the prompt, the validator rules, and the acceptance test — one single source of truth, three critical consumers.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: 1 Executable Spec → 3 Vital Consumers</strong>
+    <span class="badge req">The Triad Contract</span>
+  </div>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>🗣️ 1. The Prompt</strong>
+      <p>Directs the LLM by serializing <code>SPEC</code> as the first user message: clear instructions with zero ambiguity.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🛡️ 2. The Validator</strong>
+      <p>The Python harness reads <code>min_basket_gbp</code> and rejects invalid baskets before they hit payment APIs.</p>
+    </div>
+    <div class="info-chip">
+      <strong>✅ 3. The Acceptance Test</strong>
+      <p>CI/CD checks <code>done_when: order_placed</code> to mathematically verify the agent solved the user problem.</p>
+    </div>
+  </div>
+</div>
 
 <figure>
 <svg class="diagram" viewBox="0 0 820 360" role="img" aria-label="SPEC dictionary feeding prompt, validator, and acceptance test">
   <!-- source -->
   <rect class="dbox hi" x="40" y="130" width="200" height="100" rx="10"/>
-  <text class="dlabel" x="140" y="162" text-anchor="middle">SPEC</text>
+  <text class="dlabel" x="140" y="162" text-anchor="middle">🎯 SPEC Dictionary</text>
   <text class="dcode" x="140" y="186" text-anchor="middle">min_basket_gbp: 50</text>
   <text class="dcode" x="140" y="204" text-anchor="middle">low_stock_below: 2</text>
   <text class="dcode" x="140" y="222" text-anchor="middle">done_when: order_placed</text>
@@ -39,15 +67,15 @@
 
   <!-- three consumers -->
   <rect class="dbox" x="390" y="48" width="220" height="64" rx="8"/>
-  <text class="dlabel" x="500" y="74" text-anchor="middle">1 · Prompt</text>
+  <text class="dlabel" x="500" y="74" text-anchor="middle">🗣️ 1 · Prompt</text>
   <text class="dsub" x="500" y="94" text-anchor="middle">first user message is json.dumps(SPEC)</text>
 
   <rect class="dbox" x="390" y="148" width="220" height="64" rx="8"/>
-  <text class="dlabel" x="500" y="174" text-anchor="middle">2 · Validator rules</text>
+  <text class="dlabel" x="500" y="174" text-anchor="middle">🛡️ 2 · Validator rules</text>
   <text class="dsub" x="500" y="194" text-anchor="middle">validate() reads min_basket_gbp, max_lines</text>
 
   <rect class="dbox" x="390" y="248" width="220" height="64" rx="8"/>
-  <text class="dlabel" x="500" y="274" text-anchor="middle">3 · Acceptance test</text>
+  <text class="dlabel" x="500" y="274" text-anchor="middle">✅ 3 · Acceptance test</text>
   <text class="dsub" x="500" y="294" text-anchor="middle">assert run() until done_when</text>
 
   <!-- right side notes -->
@@ -175,8 +203,8 @@ The requirement is therefore not just stated — it is CI-enforced.
 </ul>
 
 <div class="pager">
-  <a href="index.html">← Concept map</a>
-  <a class="next" href="architecture.html">Next: Agent architecture →</a>
+  <a href="timeline.html">← ⏳ Timeline of Events</a>
+  <a class="next" href="architecture.html">Next: 🏗️ Agent Architecture →</a>
 </div>
 </body>
 </html>

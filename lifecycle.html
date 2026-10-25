@@ -3,54 +3,82 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Systems life cycle · Agent concepts</title>
+<title>🔄 Systems Life Cycle · Agent Concepts</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-  <a href="index.html">← Concept map</a>
+  <a href="index.html">🗺️ Concept Map</a>
   <span class="sep">·</span>
-  <a href="requirements.html">Requirements</a>
-  <a href="architecture.html">Agent architecture</a>
-  <span class="muted">Systems life cycle</span>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <a href="timeline.html">⏳ Timeline</a>
   <span class="sep">·</span>
-  <a href="mcp.html">MCP dev</a>
+  <a href="requirements.html">📋 Requirements</a>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <a href="llm.html">🧠 LLM</a>
+  <a href="output.html">🛡️ Output</a>
+  <a href="mcp.html">🔌 MCP</a>
+  <span class="muted">🔄 Lifecycle</span>
 </nav>
 
-<h1>Systems life cycle</h1>
-<p class="s"><code>__main__</code> assert — spec, build, test, deploy, monitor, iterate; monitoring feeds new requirements.</p>
+<h1>🔄 Systems Life Cycle of AI Agents</h1>
+<p class="s"><code>__main__</code> assert — spec, build, test, deploy, monitor, iterate; telemetry feeds new requirements in a closed continuous improvement loop.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: Continuous Agentic Life Cycle</strong>
+    <span class="badge ok">Spec → CI → Telemetry → Iteration</span>
+  </div>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>🎯 1. Executable Spec</strong>
+      <p>Requirements live as machine-readable constraints rather than static documentation decks.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🧪 2. CI-Gated Acceptance</strong>
+      <p><code>assert run()</code> ensures agents pass integration tests deterministically before deployment.</p>
+    </div>
+    <div class="info-chip">
+      <strong>📡 3. Monitoring & Re-feeding</strong>
+      <p>Production rejection patterns and edge cases feed straight back into the specification dictionary.</p>
+    </div>
+  </div>
+</div>
 
 <figure>
 <svg class="diagram" viewBox="0 0 820 420" role="img" aria-label="Systems life cycle: spec, build, test, deploy, monitor, iterate in a circle">
   <!-- circular arrangement -->
   <!-- Spec -->
   <rect class="dbox hi" x="330" y="30" width="160" height="56" rx="10"/>
-  <text class="dlabel" x="410" y="54" text-anchor="middle">1 · Spec</text>
+  <text class="dlabel" x="410" y="54" text-anchor="middle">1 · 🎯 Spec</text>
   <text class="dcode" x="410" y="74" text-anchor="middle">SPEC dict</text>
 
   <!-- Build -->
   <rect class="dbox" x="580" y="120" width="160" height="56" rx="10"/>
-  <text class="dlabel" x="660" y="144" text-anchor="middle">2 · Build</text>
+  <text class="dlabel" x="660" y="144" text-anchor="middle">2 · 🏗️ Build</text>
   <text class="dcode" x="660" y="164" text-anchor="middle">poc/bot.py</text>
 
   <!-- Test -->
   <rect class="dbox hi" x="580" y="250" width="160" height="56" rx="10"/>
-  <text class="dlabel" x="660" y="274" text-anchor="middle">3 · Test</text>
+  <text class="dlabel" x="660" y="274" text-anchor="middle">3 · 🧪 Test</text>
   <text class="dcode" x="660" y="294" text-anchor="middle">assert run()</text>
 
   <!-- Deploy -->
   <rect class="dbox" x="330" y="330" width="160" height="56" rx="10"/>
-  <text class="dlabel" x="410" y="354" text-anchor="middle">4 · Deploy</text>
+  <text class="dlabel" x="410" y="354" text-anchor="middle">4 · 🚀 Deploy</text>
   <text class="dsub" x="410" y="374" text-anchor="middle">run as a service</text>
 
   <!-- Monitor -->
   <rect class="dbox" x="80" y="250" width="160" height="56" rx="10"/>
-  <text class="dlabel" x="160" y="274" text-anchor="middle">5 · Monitor</text>
+  <text class="dlabel" x="160" y="274" text-anchor="middle">5 · 📡 Monitor</text>
   <text class="dsub" x="160" y="294" text-anchor="middle">logs · rejects · cost</text>
 
   <!-- Iterate -->
   <rect class="dbox" x="80" y="120" width="160" height="56" rx="10"/>
-  <text class="dlabel" x="160" y="144" text-anchor="middle">6 · Iterate</text>
+  <text class="dlabel" x="160" y="144" text-anchor="middle">6 · 🔄 Iterate</text>
   <text class="dsub" x="160" y="164" text-anchor="middle">new / changed SPEC</text>
 
   <!-- arrows around the ring -->
@@ -201,8 +229,8 @@ Exercise 4 in the README is this stage in miniature: add per-step logging, write
 </ul>
 
 <div class="pager">
-  <a href="mcp.html">← MCP dev</a>
-  <a class="next" href="index.html">Back to concept map →</a>
+  <a href="mcp.html">← 🔌 MCP Development</a>
+  <a class="next" href="sanity-check.html">Next: 🔬 Sanity Check & Guardrails →</a>
 </div>
 </body>
 </html>

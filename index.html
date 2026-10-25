@@ -1,50 +1,116 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agent concepts map</title><link rel="stylesheet" href="style.css"><style>
-svg{width:100%;height:auto;display:block}.n{cursor:pointer}.n rect{fill:var(--card);stroke:var(--ln);stroke-width:1.5}
-.n text{fill:var(--fg);font:14px system-ui;text-anchor:middle}.n.on rect,.n.rel rect{stroke:var(--hi);stroke-width:2.5}
-.n.dim{opacity:.35}line{stroke:var(--ln);stroke-width:1.5}line.on{stroke:var(--hi);stroke-width:2.5}
-#d{background:var(--card);border:1px solid var(--ln);border-radius:8px;padding:16px;min-height:150px}
-#d h2{margin:0 0 6px;font-size:1.1rem}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🤖 Agent Concepts Map · Learn for Development</title>
+<link rel="stylesheet" href="style.css">
+<style>
+svg#g{width:100%;height:auto;display:block}
+.n{cursor:pointer}
+.n rect{fill:var(--card);stroke:var(--ln);stroke-width:1.5}
+.n text{fill:var(--fg);font:14px system-ui;text-anchor:middle}
+.n.on rect,.n.rel rect{stroke:var(--hi);stroke-width:2.5}
+.n.dim{opacity:.35}
+line{stroke:var(--ln);stroke-width:1.5}
+line.on{stroke:var(--hi);stroke-width:2.5}
+#d{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:16px 20px;min-height:150px;margin-top:14px}
+#d h2{margin:0 0 6px;font-size:1.15rem}
 button{font:inherit;background:none;border:0;color:var(--hi);text-decoration:underline;cursor:pointer;padding:0}
-.pages{margin:18px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font:14px/1.4 system-ui,sans-serif}
-.pages a{text-decoration:none}.pages a:hover{text-decoration:underline}
+.pages{margin:22px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font:14px/1.4 system-ui,sans-serif}
+.pages a{text-decoration:none;font-weight:500}
+.pages a:hover{text-decoration:underline}
 @media(max-width:640px){.pages{grid-template-columns:1fr}}
-</style></head><body>
-<h1>Six concepts, one bot</h1><p class="s">Click a concept. Its links light up. Example: a grocery bot and its harness (poc/bot.py). Open a page for the full walkthrough with diagrams.</p>
-<svg viewBox="0 0 800 330" id="g"></svg><div id="d"></div>
+</style>
+</head>
+<body>
+<nav>
+  <span class="muted">🗺️ Concept Map</span>
+  <span class="sep">·</span>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <a href="timeline.html">⏳ Timeline</a>
+  <span class="sep">·</span>
+  <a href="requirements.html">📋 Requirements</a>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <a href="llm.html">🧠 LLM</a>
+  <a href="output.html">🛡️ Output</a>
+  <a href="mcp.html">🔌 MCP</a>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
+</nav>
+
+<h1>🤖 Agent Concepts to Learn for Development</h1>
+<p class="s">Master the complete engineering stack of autonomous AI agents through one self-contained reference bot (<code>poc/bot.py</code>).</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: The 3 Core Pillars of Agentic AI</strong>
+    <span class="badge ok">Architecture Overview</span>
+  </div>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>🎯 1. Specification & Contract</strong>
+      <p>Executable <code>SPEC</code> drives system prompt, input constraints, rejection thresholds, and acceptance criteria.</p>
+    </div>
+    <div class="info-chip">
+      <strong>⚙️ 2. Runtime Harness & Guardrails</strong>
+      <p>Deterministic loop manages working memory, calls MCP tools, validates raw output, and prevents infinite loops.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🔄 3. Feedback & Life Cycle</strong>
+      <p>Rejections feed directly back to context; telemetry drives continuous specification refinement and testing.</p>
+    </div>
+  </div>
+</div>
+
+<h2>🗺️ Interactive Concept Graph</h2>
+<p class="s">Click any concept node to explore its causal connections. Open any card to jump to the full walkthrough.</p>
+
+<svg viewBox="0 0 800 330" id="g"></svg>
+<div id="d"></div>
+
+<h2>📚 All Concepts & Deep Dives</h2>
 <ul class="pages">
-  <li><a href="requirements.html">Understanding requirements</a> — SPEC → prompt, rules, acceptance</li>
-  <li><a href="architecture.html">Agent architecture</a> — the <code>run()</code> loop</li>
-  <li><a href="llm.html">LLM fundamentals</a> — stateless model, harness memory</li>
-  <li><a href="output.html">Output handling</a> — parse, validate, retry</li>
-  <li><a href="mcp.html">MCP dev</a> — tools/list and tools/call</li>
-  <li><a href="lifecycle.html">Systems life cycle</a> — spec → monitor → iterate</li>
+  <li><a href="first-principles.html">⚛️ First Principles</a> — Deconstructing agency, stochasticity & control</li>
+  <li><a href="sanity-check.html">🔬 Sanity Check & Guardrails</a> — Zero-trust validation & safety invariants</li>
+  <li><a href="timeline.html">⏳ Timeline of Events</a> — 12-stage numbered chronological execution</li>
+  <li><a href="requirements.html">📋 Understanding Requirements</a> — <code>SPEC</code> → prompt, rules, acceptance</li>
+  <li><a href="architecture.html">🏗️ Agent Architecture</a> — the bounded <code>run()</code> execution loop</li>
+  <li><a href="llm.html">🧠 LLM Fundamentals</a> — stateless model, harness memory, token limits</li>
+  <li><a href="output.html">🛡️ Output Handling</a> — parse, validate, and feedback retry</li>
+  <li><a href="mcp.html">🔌 MCP Development</a> — <code>tools/list</code> and <code>tools/call</code> protocol boundary</li>
+  <li><a href="lifecycle.html">🔄 Systems Life Cycle</a> — spec → test → deploy → monitor → iterate</li>
 </ul>
+
 <script>
 const C={
-REQ:{t:"Understanding requirements",x:130,y:60,c:"SPEC dict: min basket £50, restock below 2.",
+REQ:{t:"📋 Requirements",x:130,y:60,c:"SPEC dict: min basket £50, restock below 2.",
  l:{LIFE:"the spec becomes the acceptance test",OUT:"constraints become validator rules",ARCH:"goal and limits shape the loop"}},
-ARCH:{t:"Agent architecture",x:400,y:60,c:"run(): loop of model call, parse, validate, tool call, observe, bounded by max_steps.",
+ARCH:{t:"🏗️ Architecture",x:400,y:60,c:"run(): loop of model call, parse, validate, tool call, observe, bounded by max_steps.",
  l:{LLM:"harness calls the model each step",OUT:"harness gates every model output",MCP:"harness routes tool calls"}},
-LIFE:{t:"Systems life cycle",x:670,y:60,c:"Spec, build, test (assert run()), deploy, monitor, iterate.",
+LIFE:{t:"🔄 Systems Life Cycle",x:670,y:60,c:"Spec, build, test (assert run()), deploy, monitor, iterate.",
  l:{REQ:"monitoring finds missed requirements",ARCH:"each stage tests the loop"}},
-LLM:{t:"LLM fundamentals",x:130,y:260,c:"mock_llm(): stateless, sees full history, token budget checked each call.",
+LLM:{t:"🧠 LLM Fundamentals",x:130,y:260,c:"mock_llm(): stateless, sees full history, token budget checked each call.",
  l:{OUT:"free text in, so output must be checked",ARCH:"harness supplies the memory"}},
-OUT:{t:"Output handling",x:400,y:260,c:"parse() then validate(). A bad basket returns an error message and the model retries.",
+OUT:{t:"🛡️ Output Handling",x:400,y:260,c:"parse() then validate(). A bad basket returns an error message and the model retries.",
  l:{REQ:"rules come from the spec",LLM:"errors go back as context"}},
-MCP:{t:"MCP dev",x:670,y:260,c:"mcp_handle(): tools/list and tools/call with JSON schemas.",
+MCP:{t:"🔌 MCP Dev",x:670,y:260,c:"mcp_handle(): tools/list and tools/call with JSON schemas.",
  l:{ARCH:"standard tool interface for the loop",OUT:"tool results are outputs too"}}};
 const g=document.getElementById('g'),d=document.getElementById('d'),ns='http://www.w3.org/2000/svg';
 const E=[];for(const a in C)for(const b in C[a].l)if(!E.some(e=>e[0]==b&&e[1]==a))E.push([a,b]);
 E.forEach(([a,b])=>{const l=document.createElementNS(ns,'line');l.dataset.k=a+b;
  l.setAttribute('x1',C[a].x);l.setAttribute('y1',C[a].y);l.setAttribute('x2',C[b].x);l.setAttribute('y2',C[b].y);g.appendChild(l)});
 for(const k in C){const n=document.createElementNS(ns,'g');n.setAttribute('class','n');n.id='n'+k;n.setAttribute('tabindex',0);
- n.innerHTML=`<rect x="${C[k].x-85}" y="${C[k].y-24}" width="170" height="48" rx="8"/><text x="${C[k].x}" y="${C[k].y+5}">${C[k].t}</text>`;
+ n.innerHTML=`<rect x="${C[k].x-90}" y="${C[k].y-24}" width="180" height="48" rx="8"/><text x="${C[k].x}" y="${C[k].y+5}">${C[k].t}</text>`;
  n.onclick=()=>pick(k);n.onkeydown=e=>e.key=='Enter'&&pick(k);g.appendChild(n)}
 const PAGE={REQ:"requirements.html",ARCH:"architecture.html",LLM:"llm.html",OUT:"output.html",MCP:"mcp.html",LIFE:"lifecycle.html"};
 function pick(k){const rel=Object.keys(C[k].l);
  for(const j in C){const n=document.getElementById('n'+j);n.setAttribute('class','n '+(j==k?'on':rel.includes(j)?'rel':'dim'))}
  g.querySelectorAll('line').forEach(l=>l.classList.toggle('on',l.dataset.k.includes(k)));
- d.innerHTML=`<h2>${C[k].t}</h2><p>${C[k].c}</p><ul>`+rel.map(r=>`<li>${C[r].t}: ${C[k].l[r]} (<button onclick="pick('${r}')">open</button>)</li>`).join('')+`</ul><p>Code: <code>poc/bot.py</code>, section [${k}] · <strong><a href="${PAGE[k]}">Detailed page with diagram →</a></strong></p>`}
+ d.innerHTML=`<h2>${C[k].t}</h2><p>${C[k].c}</p><ul>`+rel.map(r=>`<li>${C[r].t}: ${C[k].l[r]} (<button onclick="pick('${r}')">focus</button>)</li>`).join('')+`</ul><p>Code: <code>poc/bot.py</code>, section [${k}] · <strong><a href="${PAGE[k]}">Detailed page with diagram →</a></strong></p>`}
 pick('ARCH');
-</script></body></html>
+</script>
+</body>
+</html>

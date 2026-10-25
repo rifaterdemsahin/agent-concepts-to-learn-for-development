@@ -3,28 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MCP dev · Agent concepts</title>
+<title>🔌 MCP Development · Agent Concepts</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-  <a href="index.html">← Concept map</a>
+  <a href="index.html">🗺️ Concept Map</a>
   <span class="sep">·</span>
-  <a href="architecture.html">Agent architecture</a>
-  <a href="mcp.html"><span class="muted">MCP dev</span></a>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <a href="timeline.html">⏳ Timeline</a>
   <span class="sep">·</span>
-  <a href="output.html">Output handling</a>
-  <a href="lifecycle.html">Life cycle</a>
+  <a href="requirements.html">📋 Requirements</a>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <a href="llm.html">🧠 LLM</a>
+  <a href="output.html">🛡️ Output</a>
+  <span class="muted">🔌 MCP</span>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
 </nav>
 
-<h1>MCP dev</h1>
-<p class="s"><code>mcp_handle()</code> — <code>tools/list</code> and <code>tools/call</code> give the loop a standard tool interface.</p>
+<h1>🔌 Model Context Protocol (MCP) Development</h1>
+<p class="s"><code>mcp_handle()</code> — <code>tools/list</code> and <code>tools/call</code> give the loop a standard, sandboxed tool interface with strict JSON schemas.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: The Clean Protocol Boundary</strong>
+    <span class="badge ok">MCP Standard Interface</span>
+  </div>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>📜 Discovery (tools/list)</strong>
+      <p>The agent discovers tool schemas and required parameters without having direct access to database implementations.</p>
+    </div>
+    <div class="info-chip">
+      <strong>⚡ Execution (tools/call)</strong>
+      <p>Dispatches arguments through JSON-RPC messages and returns structured responses under a standard schema.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🔒 Sandboxed Isolation</strong>
+      <p>The harness never imports internal database libraries; tools live safely across a decoupled protocol boundary.</p>
+    </div>
+  </div>
+</div>
 
 <figure>
 <svg class="diagram" viewBox="0 0 820 400" role="img" aria-label="MCP interface: tools list and tools call through mcp handle">
   <!-- agent loop -->
   <rect class="dbox hi" x="40" y="80" width="180" height="90" rx="10"/>
-  <text class="dlabel" x="130" y="112" text-anchor="middle">run() loop</text>
+  <text class="dlabel" x="130" y="112" text-anchor="middle">⚙️ run() loop</text>
   <text class="dsub" x="130" y="136" text-anchor="middle">needs tools but</text>
   <text class="dsub" x="130" y="154" text-anchor="middle">must not depend on</text>
 
@@ -39,7 +67,7 @@
 
   <!-- mcp_handle -->
   <rect class="dbox hi" x="330" y="90" width="180" height="90" rx="10"/>
-  <text class="dlabel" x="420" y="122" text-anchor="middle">mcp_handle(req)</text>
+  <text class="dlabel" x="420" y="122" text-anchor="middle">🔌 mcp_handle(req)</text>
   <text class="dsub" x="420" y="146" text-anchor="middle">JSON-shaped</text>
   <text class="dsub" x="420" y="164" text-anchor="middle">protocol boundary</text>
 
@@ -54,7 +82,7 @@
 
   <!-- TOOLS registry -->
   <rect class="dbox" x="620" y="60" width="170" height="160" rx="10"/>
-  <text class="dlabel" x="705" y="88" text-anchor="middle">TOOLS registry</text>
+  <text class="dlabel" x="705" y="88" text-anchor="middle">🛠️ TOOLS registry</text>
   <rect class="dbox" x="640" y="105" width="130" height="42" rx="6"/>
   <text class="dcode" x="705" y="122" text-anchor="middle">list_pantry</text>
   <text class="dsub" x="705" y="138" text-anchor="middle">fn + inputSchema</text>
@@ -197,8 +225,8 @@ tool arguments would be validated against the schema. Same pattern at both bound
 </ul>
 
 <div class="pager">
-  <a href="output.html">← Output handling</a>
-  <a class="next" href="lifecycle.html">Next: Systems life cycle →</a>
+  <a href="output.html">← 🛡️ Output Handling</a>
+  <a class="next" href="lifecycle.html">Next: 🔄 Systems Life Cycle →</a>
 </div>
 </body>
 </html>

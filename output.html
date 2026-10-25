@@ -3,45 +3,73 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Output handling · Agent concepts</title>
+<title>🛡️ Output Handling · Agent Concepts</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-  <a href="index.html">← Concept map</a>
+  <a href="index.html">🗺️ Concept Map</a>
   <span class="sep">·</span>
-  <a href="llm.html">LLM fundamentals</a>
-  <span class="muted">Output handling</span>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="sanity-check.html">🔬 Sanity Check</a>
+  <a href="timeline.html">⏳ Timeline</a>
   <span class="sep">·</span>
-  <a href="requirements.html">Requirements</a>
-  <a href="architecture.html">Agent architecture</a>
+  <a href="requirements.html">📋 Requirements</a>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <a href="llm.html">🧠 LLM</a>
+  <span class="muted">🛡️ Output</span>
+  <a href="mcp.html">🔌 MCP</a>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
 </nav>
 
-<h1>Output handling</h1>
-<p class="s"><code>parse()</code>, <code>validate()</code> — first basket is under £50, rejected, error fed back, model retries.</p>
+<h1>🛡️ Output Handling: Parse, Validate, and Retry</h1>
+<p class="s"><code>parse()</code>, <code>validate()</code> — first basket is under £50, rejected, error fed back into context, model retries and passes.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: The 3-Stage Output Handling Pipeline</strong>
+    <span class="badge bad">Deterministic Defense</span>
+  </div>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>🔍 1. Regex Extraction</strong>
+      <p>Strips conversational markdown preamble and isolations (e.g. <code>```json</code>) into raw JSON strings.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🛡️ 2. Business Invariant Gate</strong>
+      <p>Checks catalog whitelist, max item lines, and financial minimums (<code>basket &gt;= £50</code>).</p>
+    </div>
+    <div class="info-chip">
+      <strong>🔄 3. Semantic Error Feedback</strong>
+      <p>Injects the exact refusal rationale back to the LLM so it can compute an informed adjustment.</p>
+    </div>
+  </div>
+</div>
 
 <figure>
 <svg class="diagram" viewBox="0 0 820 400" role="img" aria-label="Output handling: free text to parse to validate, reject under 50 pounds, retry, accept">
   <!-- raw free text -->
   <rect class="dbox" x="24" y="36" width="190" height="96" rx="8"/>
-  <text class="dlabel" x="119" y="62" text-anchor="middle">raw model text</text>
+  <text class="dlabel" x="119" y="62" text-anchor="middle">raw model text 💬</text>
   <text class="dsub" x="119" y="84" text-anchor="middle">Sure!</text>
   <text class="dcode" x="119" y="104" text-anchor="middle">```json</text>
   <text class="dcode" x="119" y="120" text-anchor="middle">{ "basket": … }</text>
 
   <path class="dline hi" d="M222 84 H268"/>
   <polygon fill="var(--hi)" points="268,84 258,78 258,90"/>
-  <text class="dcode" x="245" y="72" text-anchor="middle">parse()</text>
+  <text class="dcode" x="245" y="72" text-anchor="middle">parse() 🔍</text>
 
   <!-- parsed -->
   <rect class="dbox" x="278" y="42" width="180" height="84" rx="8"/>
-  <text class="dlabel" x="368" y="72" text-anchor="middle">JSON object</text>
+  <text class="dlabel" x="368" y="72" text-anchor="middle">JSON object 📦</text>
   <text class="dcode" x="368" y="96" text-anchor="middle">{"action":"order",</text>
   <text class="dcode" x="368" y="112" text-anchor="middle">"basket": bad}</text>
 
   <path class="dline hi" d="M466 84 H512"/>
   <polygon fill="var(--hi)" points="512,84 502,78 502,90"/>
-  <text class="dcode" x="489" y="72" text-anchor="middle">validate()</text>
+  <text class="dcode" x="489" y="72" text-anchor="middle">validate() 🛡️</text>
 
   <!-- decision diamond -->
   <path class="dbox" d="M590 44 L680 84 L590 124 L500 84 Z" fill="var(--card)"/>
@@ -54,7 +82,7 @@
   <text class="dsub" x="535" y="160" fill="var(--bad)">no</text>
 
   <rect class="dbox bad" x="280" y="188" width="240" height="58" rx="8"/>
-  <text class="dlabel" x="400" y="212" text-anchor="middle">REJECTED</text>
+  <text class="dlabel" x="400" y="212" text-anchor="middle">❌ REJECTED</text>
   <text class="dcode" x="400" y="232" text-anchor="middle">"basket £10.70 is below minimum £50"</text>
 
   <!-- error fed back -->
@@ -211,8 +239,8 @@ Both failures are recoverable; only the step budget and a valid <code>done</code
 </ul>
 
 <div class="pager">
-  <a href="llm.html">← LLM fundamentals</a>
-  <a class="next" href="mcp.html">Next: MCP dev →</a>
+  <a href="llm.html">← 🧠 LLM Fundamentals</a>
+  <a class="next" href="mcp.html">Next: 🔌 MCP Development →</a>
 </div>
 </body>
 </html>

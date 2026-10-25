@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🔬 Sanity Check: Zero-Trust Guardrails · Agent Concepts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html">🗺️ Concept Map</a>
+  <span class="sep">·</span>
+  <a href="first-principles.html">⚛️ First Principles</a>
+  <a href="timeline.html">⏳ Timeline</a>
+  <span class="sep">·</span>
+  <a href="requirements.html">📋 Requirements</a>
+  <a href="architecture.html">🏗️ Architecture</a>
+  <a href="llm.html">🧠 LLM</a>
+  <a href="output.html">🛡️ Output</a>
+  <a href="mcp.html">🔌 MCP</a>
+  <a href="lifecycle.html">🔄 Lifecycle</a>
+  <span class="sep">·</span>
+  <span class="muted">🔬 Sanity Check</span>
+</nav>
+
+<h1>🔬 Sanity Check & Zero-Trust Guardrails</h1>
+<p class="s">Why agents cannot self-certify: how deterministic checks enforce safety invariants around stochastic models.</p>
+
+<!-- Top Infographic -->
+<div class="infographic-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;margin-bottom:12px;">
+    <strong>📊 INFOGRAPHIC: The 3-Tier Agent Sanity Funnel</strong>
+    <span class="badge ok">Zero-Trust Architecture</span>
+  </div>
+
+  <svg class="diagram" viewBox="0 0 800 240" role="img" aria-label="Sanity Check Funnel: Pre-Flight, In-Flight Loop, and Post-Flight Acceptance">
+    <!-- Step 1: Pre-Flight -->
+    <rect class="dbox hi" x="20" y="30" width="220" height="170" rx="10"/>
+    <text class="dlabel" x="130" y="65" text-anchor="middle">🛡️ Tier 1: Pre-Flight</text>
+    <text class="dsub" x="130" y="90" text-anchor="middle">Before Calling Model</text>
+    <line class="dline" x1="40" y1="105" x2="220" y2="105"/>
+    <text class="dcode" x="130" y="130" text-anchor="middle">tokens(msgs) &lt; 8000</text>
+    <text class="dsub" x="130" y="152" text-anchor="middle">Step limit: step &lt; max_steps</text>
+    <text class="dsub" x="130" y="174" text-anchor="middle">Context budget enforced</text>
+
+    <!-- Arrow 1 -> 2 -->
+    <path class="dline hi" d="M245 115 H285"/>
+    <polygon fill="var(--hi)" points="285,115 275,109 275,121"/>
+
+    <!-- Step 2: In-Flight Loop -->
+    <rect class="dbox ok" x="290" y="30" width="220" height="170" rx="10"/>
+    <text class="dlabel" x="400" y="65" text-anchor="middle">⚡ Tier 2: In-Flight Gate</text>
+    <text class="dsub" x="400" y="90" text-anchor="middle">Gating Every Generation</text>
+    <line class="dline" x1="310" y1="105" x2="490" y2="105"/>
+    <text class="dcode" x="400" y="130" text-anchor="middle">parse(raw) -&gt; JSON</text>
+    <text class="dcode" x="400" y="152" text-anchor="middle">basket &gt;= £50</text>
+    <text class="dsub" x="400" y="174" text-anchor="middle">Item in pantry whitelist</text>
+
+    <!-- Arrow 2 -> 3 -->
+    <path class="dline hi" d="M515 115 H555"/>
+    <polygon fill="var(--hi)" points="555,115 545,109 545,121"/>
+
+    <!-- Step 3: Post-Flight Acceptance -->
+    <rect class="dbox" x="560" y="30" width="220" height="170" rx="10"/>
+    <text class="dlabel" x="670" y="65" text-anchor="middle">🏁 Tier 3: Post-Flight</text>
+    <text class="dsub" x="670" y="90" text-anchor="middle">System State Acceptance</text>
+    <line class="dline" x1="580" y1="105" x2="760" y2="105"/>
+    <text class="dcode" x="670" y="130" text-anchor="middle">assert run() == True</text>
+    <text class="dsub" x="670" y="152" text-anchor="middle">Order confirmed placed</text>
+    <text class="dsub" x="670" y="174" text-anchor="middle">Zero unhandled exceptions</text>
+  </svg>
+
+  <div class="infographic-grid">
+    <div class="info-chip">
+      <strong>🚨 The Risk</strong>
+      <p>LLMs are probabilistic token predictors that will confidently hallucinate invalid items, negative amounts, or skip business rules.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🛡️ The Solution</strong>
+      <p>The Python harness sits outside the LLM. It intercepts raw output, tests every assertion deterministically, and rejects violations.</p>
+    </div>
+    <div class="info-chip">
+      <strong>🔄 The Feedback</strong>
+      <p>Instead of crashing, the harness feeds the exact rejection message back into context, guiding the model to self-correct.</p>
+    </div>
+  </div>
+</div>
+
+<h2>🎯 The Rationale: Why Sanity Checks are Non-Negotiable</h2>
+<p>
+In classical programming, functions are deterministic: <code>f(x)</code> produces a predictable output based on rigid logic. In agentic systems, the "function" core is a stochastic transformer model. Even when prompted with instructions like <em>"order at least £50 of groceries"</em>, the model may return:
+</p>
+<ul>
+  <li>Freeform markdown commentary (e.g. <code>"Sure! Here is the order: ```json..."</code>) instead of valid schema.</li>
+  <li>Under-budget baskets (in <code>poc/bot.py</code> step 1, the model orders only £10.20 of goods).</li>
+  <li>Invented/hallucinated inventory items not present in the catalog.</li>
+  <li>Infinite loops if tools return unexpected formats or error statuses.</li>
+</ul>
+
+<div class="note">
+  <strong>💡 Core Law of Agent Sanity:</strong> Never trust the LLM to grade its own homework. An agent cannot declare itself "done" or "valid" without an independent, deterministic harness verifying each invariant.
+</div>
+
+<h2>🔍 The 6 Sanity Checks in <code>poc/bot.py</code></h2>
+<p>
+The reference bot in <code>poc/bot.py</code> implements six distinct sanity checks distributed across every phase of execution:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Sanity Check</th>
+      <th>Code Location</th>
+      <th>Invariant Enforced</th>
+      <th>Failure Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1</strong></td>
+      <td>Context Window Guard</td>
+      <td><code>tokens(msgs) &lt; 8000</code></td>
+      <td>Prevents memory explosion & runaway token billing</td>
+      <td><span class="status-pill fail">❌ Hard Crash</span> Raises AssertionError</td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>Max Step Limit</td>
+      <td><code>for step in range(max_steps):</code></td>
+      <td>Guarantees termination; caps maximum execution cost</td>
+      <td><span class="status-pill fail">❌ Fail Run</span> Returns False</td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>JSON Regex Extraction</td>
+      <td><code>re.search(r"\{.*\}", text, re.S)</code></td>
+      <td>Extracts structured payload even from conversational chatter</td>
+      <td><span class="status-pill warn">⚠️ Retry Loop</span> Feeds syntax error to LLM</td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>Catalog Whitelist</td>
+      <td><code>set(b) &lt;= set(PRICE)</code></td>
+      <td>Rejects hallucinated SKUs not present in price database</td>
+      <td><span class="status-pill warn">⚠️ Reject & Retry</span> Returns error feedback</td>
+    </tr>
+    <tr>
+      <td><strong>5</strong></td>
+      <td>Business Rule Gating</td>
+      <td><code>basket_total(b) &gt;= SPEC["min_basket_gbp"]</code></td>
+      <td>Enforces commercial constraints (£50 minimum basket)</td>
+      <td><span class="status-pill warn">⚠️ Reject & Retry</span> Injects feedback: "basket £10.2 is below £50"</td>
+    </tr>
+    <tr>
+      <td><strong>6</strong></td>
+      <td>Acceptance Assertion</td>
+      <td><code>assert run(), "acceptance test failed"</code></td>
+      <td>End-to-end integration proof that goal was accomplished</td>
+      <td><span class="status-pill fail">❌ CI / CD Break</span> Blocks deployment</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>🧪 Live Trace: Sanity Check in Action</h2>
+<p>
+Here is how the sanity check caught and corrected a model mistake during our execution of <code>python poc/bot.py</code>:
+</p>
+<pre><code>tools: ['list_pantry', 'place_order']
+[0] tool list_pantry -> {'milk': 0, 'eggs': 2, 'rice': 1, 'yoghurt': 0}
+
+# 🚨 SANITY CHECK TRIPPED HERE:
+[1] REJECTED: basket £10.2 is below minimum £50
+# Harness appends error to memory: {"role": "error", "content": "basket £10.2 is below minimum £50"}
+
+# 🔄 MODEL RE-EVALUATES WITH CONTEXT:
+[2] ORDER OK -> {'status': 'order_placed', 'total': 50.6}
+[3] DONE
+acceptance test passed -> order_placed</code></pre>
+
+<p>
+Without the sanity check at step <code>[1]</code>, an underfunded order would have been dispatched to the payment gateway, causing financial or logistical errors. The harness caught the mistake deterministically, gave the model constructive feedback, and the model succeeded on step <code>[2]</code>.
+</p>
+
+<h2>📋 Agent Sanity Checklist for Production</h2>
+<div class="box">
+  <h3>✅ Production Readiness Gate</h3>
+  <ul>
+    <li>[ ] <strong>Bounded Steps:</strong> Is there an unbypassable <code>max_steps</code> or execution timeout?</li>
+    <li>[ ] <strong>Budget Limits:</strong> Are token counts and tool call counts strictly monitored?</li>
+    <li>[ ] <strong>Deterministic Parser:</strong> Does output parsing handle markdown code blocks, whitespace, and invalid JSON?</li>
+    <li>[ ] <strong>External Verifier:</strong> Are financial, database, or API actions guarded by programmatic validators rather than system prompts alone?</li>
+    <li>[ ] <strong>Sanitized Feedback:</strong> Does the error feedback explain <em>why</em> the action failed without leaking sensitive system data?</li>
+    <li>[ ] <strong>End-to-End Acceptance Test:</strong> Can the entire agent run against mock tools in CI without human intervention?</li>
+  </ul>
+</div>
+
+<div class="pager">
+  <div class="prev"><a href="first-principles.html">← ⚛️ First Principles</a></div>
+  <div class="next"><a href="timeline.html">⏳ Timeline of Events →</a></div>
+</div>
+
+</body>
+</html>
